@@ -1,0 +1,13 @@
+server:
+  port: 8081
+spring:
+  application:
+    name: helloworld
+  test:
+    mockmvc:
+      print: SYSTEM_OUT
+  aop:
+    auto: false
+management.endpoints.web.exposure.include: '*'
+custom:
+  boolean-value:

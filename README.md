@@ -1,7 +1,7 @@
 Spring Boot Assistant - IntelliJ-based plugin that assists you in developing spring boot applications
 =====================================================================================
 
-![Plugin in action](help.gif)
+![Plugin in action](plugin-docs/help.gif)
 
 ## What does the plugin do
 
@@ -90,7 +90,7 @@ For this to work, you need to ensure the following steps are followed for your p
    to `File | Settings | Build, Execution, Deployment | Build Tools | Gradle | Runner => Delegate IDE build/run actions to gradle`
    & restart the IDE. This will ensure that gradle plugin generates metadata & Intellij is pointing to it
 
-> If you want to look at a sample project, look inside [samples](samples/) directory where the above setup is done.
+> If you want to look at a sample project, look inside [samples](plugin-test/) directory where the above setup is done.
 > These samples allow properties from `@ConfigurationProperties` to be shown as suggestions
 
 **IMPORTANT**

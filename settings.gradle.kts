@@ -1,8 +1,5 @@
-pluginManagement {
-    plugins {
-        id("org.jetbrains.intellij.platform") version "2.0.1"
-        id("org.jetbrains.changelog") version "2.2.1"
-        id("io.freefair.lombok") version "8.10"
-    }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version ("0.8.0")
 }
 rootProject.name = "idea-spring-boot-assistant"
+include("plugin")

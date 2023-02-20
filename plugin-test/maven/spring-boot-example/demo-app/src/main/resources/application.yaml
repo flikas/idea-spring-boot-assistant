@@ -1,0 +1,128 @@
+# Positive test cases, here should no warnings ----------------->
+
+# Completion test
+spring:
+  devtools.add-properties: true
+  jpa.hibernate:
+    # Completion: hint-values
+    ddl-auto: 'create-drop'
+  # Completion: enum
+  data.cassandra.request.throttler.type: CONCURRENCY_LIMITING
+  datasource:
+    # Completion: class-reference
+    driver-class-name: org.h2.Driver
+  # Completion: List<org.springframework.core.io.Resource>
+  sql.init.data-locations:
+    - 'classpath:banner.txt'
+    - 'classpath:db/change-log/master.yaml'
+    # Completion: handle-as org.springframework.core.io.Resource
+  liquibase.change-log: 'classpath:banner.txt'
+  # Completion: handle-as org.springframework.util.MimeType
+  freemarker.content-type: application/json
+# Completion: handle-as Charset
+server:
+  servlet.encoding.charset: 'UTF-8'
+  tomcat.accesslog:
+    encoding: 'IBM-Thai'
+    # Completion: handle-as Locale
+    locale: en_US
+logging:
+  group:
+    app:
+      - 'dev.flikas'
+    spring:
+      - 'org.springframework'
+  level:
+    root: info
+    org.springframework: debug
+---
+# In project metadata
+oo:
+  b: c
+example:
+  server:
+    address:
+    port: 8080
+    value: 123
+my:
+  keys1:
+    - foo
+    - bar
+  jobs:
+    key:
+      name: 12  # Needs Lombok plugin, key from Map<String, POJO>
+      cron: xxf # Needs Lombok plugin, key from Map<String, POJO>
+---
+# Inspection:KeyNotDefined(positive)
+logging.level:
+  # hint: enum
+  root: debug
+  # hint: logger-name
+  org.your-company: info
+resilience4j.circuitbreaker.instances:
+  "backendA":
+    # In Type: Map<String, POJO>
+    allowHealthIndicatorToFail: false
+server:
+  servlet.encoding:
+    "mapping":
+      # In Type: Map<Non-String-Key, Non-String-Value>
+      "en-US": "UTF-8"
+  # For Type: List<String>
+  jetty.accesslog.ignore-paths:
+    - p1
+    - p2
+    - p3
+spring:
+  profiles:
+    # Pure key
+    active: dev
+  datasource.hikari.data-source-properties:
+    # For Type: java.util.Properties
+    any-property: should-be-valid
+  # For Type: java.util.Properties, can map any depth of keys
+  jpa.properties:
+    hibernate:
+      archive:
+        # Inspection::KeyNotDefined(positive)
+        scanner: org.hibernate.boot.archive.scan.internal.StandardScanner
+---
+#Inspection::InvalidValue(positive)
+# Type: Charset
+logging.charset.console: utf-8
+server:
+  # Type: List<String>
+  jetty.accesslog.ignore-paths:
+    - p1
+    - p2
+    - p3
+  tomcat:
+    # Type: int
+    accept-count: 1
+    # Type: Duration
+    connection-timeout: 3m
+    # variable substitute
+    threads.max: ${spring.cloud-version}
+    access-log:
+      # Type: boolean
+      buffered: false
+spring:
+  # Type org.springframework.core.io.Resource
+  banner.location: 'classpath:banner.txt'
+  profiles:
+    # Type: List<String> -- String
+    active: dev
+  # Type: java.util.Properties
+  datasource.hikari.data-source-properties:
+    any-property: should-be-valid
+  # Type: Map<String, String> -- any depth of keys
+  jpa.properties:
+    hibernate:
+      archive:
+        scanner: org.hibernate.boot.archive.scan.internal.StandardScanner
+---
+# Inspection::Deprecated(positive)
+# Deprecated property but available sub-property
+spring:
+  profiles:
+    active: dev

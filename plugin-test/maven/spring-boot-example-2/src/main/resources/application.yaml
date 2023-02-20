@@ -1,0 +1,28 @@
+spring:
+  banner:
+    charset: goog
+  application:
+    name:
+      - abcdef
+      - xyzdef
+  profiles:
+    active:
+      - abc
+      - def
+      - ggg
+  jpa:
+    hibernate:
+      naming:
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    properties:
+      abc: def
+      hibernate:
+        archive:
+          scanner: org.hibernate.boot.archive.scan.internal.StandardScanner
+logging:
+  log4j2:
+    config:
+      override: abc
+  level:
+    root: info
+
