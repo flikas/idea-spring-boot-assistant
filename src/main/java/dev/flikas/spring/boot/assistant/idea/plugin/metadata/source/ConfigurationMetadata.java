@@ -1,4 +1,4 @@
-package dev.flikas.spring.boot.assistant.idea.plugin.metadata;
+package dev.flikas.spring.boot.assistant.idea.plugin.metadata.source;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;

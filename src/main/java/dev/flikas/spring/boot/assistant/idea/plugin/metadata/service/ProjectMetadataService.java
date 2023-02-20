@@ -10,8 +10,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.newvfs.BulkFileListener;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
-import dev.flikas.spring.boot.assistant.idea.plugin.metadata.ConfigurationMetadata;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 

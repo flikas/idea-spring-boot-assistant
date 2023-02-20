@@ -1,7 +1,7 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.index;
 
 import com.intellij.psi.PsiClass;
-import dev.flikas.spring.boot.assistant.idea.plugin.metadata.ConfigurationMetadata;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

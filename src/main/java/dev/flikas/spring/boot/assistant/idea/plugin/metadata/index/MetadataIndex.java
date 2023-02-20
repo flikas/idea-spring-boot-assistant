@@ -8,7 +8,8 @@ import com.intellij.psi.util.PropertyUtil;
 import com.intellij.psi.util.PsiTypesUtil;
 import com.intellij.psi.util.PsiUtil;
 import com.intellij.psi.util.TypeConversionUtil;
-import dev.flikas.spring.boot.assistant.idea.plugin.metadata.ConfigurationMetadata;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyName;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -199,7 +200,7 @@ public class MetadataIndex {
       for (String fieldName : PropertyUtil.getWritableProperties(valueClass, true)) {
         PsiField field = valueClass.findFieldByName(fieldName, true);
         if (field == null) continue;
-        ConfigurationPropertyName name = basename.append(PropertyNameUtils.toKebabCase(fieldName));
+        ConfigurationPropertyName name = basename.append(PropertyName.toKebabCase(fieldName));
         ConfigurationMetadata.Property meta = new ConfigurationMetadata.Property();
         meta.setName(name.toString());
         meta.setType(Objects.requireNonNull(PropertyUtil.getPropertyType(field)).getCanonicalText());
@@ -224,8 +225,6 @@ public class MetadataIndex {
 
 
   private static boolean isValueType(PsiType type) {
-//    new SimpleTypeConverter().getConversionService().canConvert()
-
     return TypeConversionUtil.isAssignableFromPrimitiveWrapper(type)
         || TypeConversionUtil.isPrimitiveAndNotNullOrWrapper(type)
         || TypeConversionUtil.isEnumType(type)
@@ -322,7 +321,7 @@ public class MetadataIndex {
 
 
     private String getFieldName() {
-      return PropertyNameUtils.toCamelCase(propertyName.getLastElement(ConfigurationPropertyName.Form.DASHED));
+      return PropertyName.toCamelCase(propertyName.getLastElement(ConfigurationPropertyName.Form.DASHED));
     }
   }
 
