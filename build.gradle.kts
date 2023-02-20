@@ -9,14 +9,16 @@ plugins {
     id("org.jetbrains.intellij.platform")
     id("org.jetbrains.changelog")
     id("io.freefair.lombok")
+    id("org.springframework.boot")
 }
+apply(plugin = "io.spring.dependency-management")
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
 }
 
 group = "dev.flikas"
-version = "242.2.0"
+version = "242.18.0-EAP"
 
 repositories {
     mavenCentral()
@@ -44,6 +46,7 @@ dependencies {
     implementation("org.apache.commons", "commons-collections4", "4.4")
     implementation("org.apache.commons", "commons-lang3", "3.14.0")
     implementation("com.miguelfonseca.completely", "completely-core", "0.9.0")
+    implementation("org.springframework.boot", "spring-boot")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito", "mockito-core", "2.12.0")

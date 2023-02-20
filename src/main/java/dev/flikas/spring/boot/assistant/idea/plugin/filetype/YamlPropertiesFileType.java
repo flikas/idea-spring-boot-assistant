@@ -1,4 +1,4 @@
-package dev.flikas.spring.boot.assistant.idea.plugin.suggestion.filetype;
+package dev.flikas.spring.boot.assistant.idea.plugin.filetype;
 
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import in.oneton.idea.spring.assistant.plugin.misc.Icons;

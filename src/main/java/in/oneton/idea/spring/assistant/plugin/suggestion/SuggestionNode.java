@@ -13,10 +13,6 @@ import java.util.SortedSet;
 public interface SuggestionNode
     extends OriginalNameProvider, DocumentationProvider, SuggestionNodeTypeProvider {
 
-  static String sanitise(String name) {
-    return name.trim().replaceAll("_", "").replace("-", "").toLowerCase();
-  }
-
   /**
    * If {@code matchAllSegments} is true, all {@code pathSegments} starting from {@code pathSegmentStartIndex} will be attempted to be matched. If a result is found, it will be returned. Else null
    * Else, method should attempt to match as deep as it can match & return bottom most match

@@ -6,7 +6,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import dev.flikas.spring.boot.assistant.idea.plugin.suggestion.filetype.YamlPropertiesFileType;
+import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.Nullable;
 

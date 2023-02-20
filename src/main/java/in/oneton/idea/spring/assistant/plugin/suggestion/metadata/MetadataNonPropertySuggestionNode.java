@@ -5,6 +5,7 @@ import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiType;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
+import in.oneton.idea.spring.assistant.plugin.misc.GenericUtil;
 import in.oneton.idea.spring.assistant.plugin.misc.PsiCustomUtil;
 import in.oneton.idea.spring.assistant.plugin.suggestion.Suggestion;
 import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode;
@@ -144,7 +145,7 @@ public class MetadataNonPropertySuggestionNode extends MetadataSuggestionNode {
   public static MetadataNonPropertySuggestionNode newInstance(String originalName,
       @Nullable MetadataNonPropertySuggestionNode parent, String belongsTo) {
     MetadataNonPropertySuggestionNodeBuilder builder =
-        MetadataNonPropertySuggestionNode.builder().name(SuggestionNode.sanitise(originalName))
+        MetadataNonPropertySuggestionNode.builder().name(GenericUtil.sanitise(originalName))
             .originalName(originalName).parent(parent);
     Set<String> belongsToSet = new THashSet<>();
     belongsToSet.add(belongsTo);
@@ -473,7 +474,7 @@ public class MetadataNonPropertySuggestionNode extends MetadataSuggestionNode {
     MetadataSuggestionNode childNode =
         MetadataPropertySuggestionNode.newInstance(originalName, property, this, belongsTo);
 
-    String name = SuggestionNode.sanitise(originalName);
+    String name = GenericUtil.sanitise(originalName);
     childLookup.put(name, childNode);
     childrenTrie.put(name, childNode);
   }
@@ -490,7 +491,7 @@ public class MetadataNonPropertySuggestionNode extends MetadataSuggestionNode {
     assert childrenTrie != null;
 
     String rawPathSegment = rawPathSegments[startIndex];
-    String pathSegment = SuggestionNode.sanitise(rawPathSegment);
+    String pathSegment = GenericUtil.sanitise(rawPathSegment);
     MetadataNonPropertySuggestionNode childNode =
         (MetadataNonPropertySuggestionNode) childLookup.get(pathSegment);
     if (childNode == null) {

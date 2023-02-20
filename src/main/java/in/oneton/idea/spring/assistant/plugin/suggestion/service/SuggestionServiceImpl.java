@@ -10,6 +10,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
+import in.oneton.idea.spring.assistant.plugin.misc.GenericUtil;
 import in.oneton.idea.spring.assistant.plugin.suggestion.Suggestion;
 import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode;
 import in.oneton.idea.spring.assistant.plugin.suggestion.completion.FileType;
@@ -17,13 +18,7 @@ import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.MetadataContai
 import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.MetadataNonPropertySuggestionNode;
 import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.MetadataPropertySuggestionNode;
 import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.MetadataSuggestionNode;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.GsonPostProcessEnablingTypeFactory;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadata;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataGroup;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataHint;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataProperty;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataValueProviderType;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataValueProviderTypeDeserializer;
+import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.*;
 import org.apache.commons.collections4.Trie;
 import org.apache.commons.collections4.trie.PatriciaTrie;
 import org.apache.commons.lang3.time.StopWatch;
@@ -33,28 +28,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedMap;
+import java.util.*;
 
 import static com.intellij.openapi.application.ApplicationManager.getApplication;
-import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.modifiableList;
-import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.truncateIdeaDummyIdentifier;
+import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.*;
 import static in.oneton.idea.spring.assistant.plugin.suggestion.Suggestion.PERIOD_DELIMITER;
-import static in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode.sanitise;
 import static java.util.Arrays.stream;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.*;
 
 /**
  * A Module level service which holds the index of Spring Boot configuration metadata,
@@ -142,7 +125,7 @@ public class SuggestionServiceImpl implements SuggestionService {
           SuggestionNode startSearchFrom = null;
           if (ancestralKeySegments.length > 1) {
             String[] sanitisedAncestralPathSegments =
-                stream(ancestralKeySegments).map(SuggestionNode::sanitise).toArray(String[]::new);
+                stream(ancestralKeySegments).map(GenericUtil::sanitise).toArray(String[]::new);
             matchesRootToDeepest = rootNode
                 .findDeepestSuggestionNode(module, modifiableList(rootNode),
                     sanitisedAncestralPathSegments, 1);

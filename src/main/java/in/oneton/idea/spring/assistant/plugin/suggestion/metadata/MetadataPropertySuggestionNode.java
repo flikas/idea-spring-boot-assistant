@@ -7,13 +7,7 @@ import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode;
 import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNodeType;
 import in.oneton.idea.spring.assistant.plugin.suggestion.completion.FileType;
 import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataProperty;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -22,7 +16,7 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.newSingleElementSortedSet;
-import static in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode.sanitise;
+import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.sanitise;
 
 /**
  * Represents leaf node in the tree that holds the reference to dynamic suggestion node

@@ -15,7 +15,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.codeStyle.IndentHelperImpl;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.flikas.spring.boot.assistant.idea.plugin.suggestion.filetype.YamlPropertiesFileType;
+import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.yaml.YAMLTextUtil;
 import org.jetbrains.yaml.YAMLTokenTypes;

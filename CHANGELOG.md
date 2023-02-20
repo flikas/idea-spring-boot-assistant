@@ -8,6 +8,7 @@ to [Semantic Versioning](https://semver.org).
 
 ### Added
 
+- Inspection: add `spring-boot-configuration-processor`
 ### Changed
 
 ### Deprecated

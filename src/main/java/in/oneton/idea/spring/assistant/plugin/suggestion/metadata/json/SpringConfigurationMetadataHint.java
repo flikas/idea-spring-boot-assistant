@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode.sanitise;
+import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.sanitise;
 import static in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataValueProviderType.any;
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;

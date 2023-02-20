@@ -7,8 +7,8 @@ import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.progress.ProgressIndicatorProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
+import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
 import dev.flikas.spring.boot.assistant.idea.plugin.misc.ServiceUtil;
-import dev.flikas.spring.boot.assistant.idea.plugin.suggestion.filetype.YamlPropertiesFileType;
 import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode;
 import in.oneton.idea.spring.assistant.plugin.suggestion.service.SuggestionService;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +22,13 @@ import java.util.List;
 import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.truncateIdeaDummyIdentifier;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Key
+ *
+ * <table style=">td{border:1px;}border: 1px solid; td border: 1px;">
+ *     <tr><td>abc</td></tr>
+ * </table>
+ */
 public class KeyNotDefinedInspection extends LocalInspectionTool {
   @Override
   public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {

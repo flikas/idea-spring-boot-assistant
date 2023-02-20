@@ -23,13 +23,15 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: '21'
-          distribution: 'adopt'
+          distribution: 'corretto'
           server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
           settings-path: ${{ github.workspace }} # location for the settings.xml file
           cache: gradle
+
       - name: Build with Gradle
         run: ./gradlew buildPlugin
-      # FIXME: Do not verify plugin for known problem: https://youtrack.jetbrains.com/issue/MP-6708
+
+# FIXME: Do not verify plugin for known problem: https://youtrack.jetbrains.com/issue/MP-6708
       #      - name: Run Plugin Verifier
       #        run: ./gradlew verifyPlugin
       # The USERNAME and TOKEN need to correspond to the credentials environment variables used in

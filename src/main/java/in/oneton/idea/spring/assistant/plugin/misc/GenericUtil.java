@@ -14,22 +14,14 @@ import org.jetbrains.yaml.YAMLLanguage;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
 
 import java.text.BreakIterator;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.intellij.codeInsight.completion.CompletionUtilCore.DUMMY_IDENTIFIER_TRIMMED;
 import static com.intellij.codeInsight.documentation.DocumentationManagerUtil.createHyperlink;
-import static com.intellij.openapi.util.text.StringUtil.containsChar;
-import static com.intellij.openapi.util.text.StringUtil.endsWithChar;
-import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
-import static com.intellij.openapi.util.text.StringUtil.replace;
+import static com.intellij.openapi.util.text.StringUtil.*;
 import static java.text.BreakIterator.getSentenceInstance;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -268,9 +260,14 @@ public class GenericUtil {
     return suggestions;
   }
 
+
   public static Optional<String> getKeyNameOfObject(final PsiElement psiElement) {
     return Optional.of(psiElement).filter(el -> el instanceof YAMLKeyValue)
-                   .map(YAMLKeyValue.class::cast).map(YAMLKeyValue::getName);
+        .map(YAMLKeyValue.class::cast).map(YAMLKeyValue::getName);
   }
 
+
+  public static String sanitise(String name) {
+    return name.trim().replaceAll("_", "").replace("-", "").toLowerCase();
+  }
 }

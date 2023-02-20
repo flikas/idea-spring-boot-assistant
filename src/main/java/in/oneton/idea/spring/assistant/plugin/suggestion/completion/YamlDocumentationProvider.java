@@ -14,7 +14,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.impl.light.LightElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.DocumentUtil;
-import dev.flikas.spring.boot.assistant.idea.plugin.suggestion.filetype.YamlPropertiesFileType;
+import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
 import in.oneton.idea.spring.assistant.plugin.suggestion.Suggestion;
 import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode;
 import in.oneton.idea.spring.assistant.plugin.suggestion.service.SuggestionService;
@@ -49,8 +49,7 @@ public class YamlDocumentationProvider extends AbstractDocumentationProvider {
   @Override
   public PsiElement getDocumentationElementForLookupItem(PsiManager psiManager, Object object,
       @Nullable PsiElement element) {
-    if (object instanceof Suggestion) {
-      Suggestion suggestion = (Suggestion) object;
+    if (object instanceof Suggestion suggestion) {
       return new DocumentationProxyElement(
           psiManager,
           JavaLanguage.INSTANCE,
