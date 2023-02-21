@@ -139,4 +139,8 @@ tasks {
         token.set(System.getenv("PUBLISH_TOKEN"))
         channels.set(listOf(version.toString().split('-').getOrElse(1) { "default" }.split('.').first()))
     }
+
+    test {
+        useJUnitPlatform()
+    }
 }
