@@ -17,19 +17,20 @@ import lombok.ToString;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.springframework.boot.context.properties.source.ConfigurationPropertyName;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationPropertyName.Form.DASHED;
 
 public class MetadataIndex {
   public static final MetadataIndex EMPTY = new MetadataIndex();
   private static final Logger log = Logger.getInstance(MetadataIndex.class);
   @Getter
   private final Map<String, ConfigurationMetadata> sourceUrlToMetadata = new ConcurrentHashMap<>();
-  private final Map<ConfigurationPropertyName, Group> groups = new HashMap<>();
-  private final Map<ConfigurationPropertyName, Property> properties = new HashMap<>();
-  private final Map<ConfigurationPropertyName, Hint> hints = new HashMap<>();
+  private final Map<PropertyName, Group> groups = new HashMap<>();
+  private final Map<PropertyName, Property> properties = new HashMap<>();
+  private final Map<PropertyName, Hint> hints = new HashMap<>();
   private final Project project;
 
 
@@ -59,7 +60,7 @@ public class MetadataIndex {
     this.sourceUrlToMetadata.computeIfAbsent(sourceUrl, url -> {
       if (metadata.getGroups() != null) {
         metadata.getGroups().forEach(g -> {
-          ConfigurationPropertyName name = ConfigurationPropertyName.ofIfValid(g.getName());
+          PropertyName name = PropertyName.ofIfValid(g.getName());
           if (name != null)
             this.groups.put(name, new Group(g));
           else
@@ -68,7 +69,7 @@ public class MetadataIndex {
       }
       if (metadata.getHints() != null) {
         metadata.getHints().forEach(h -> {
-          ConfigurationPropertyName name = ConfigurationPropertyName.ofIfValid(h.getName());
+          PropertyName name = PropertyName.ofIfValid(h.getName());
           if (name != null)
             this.hints.put(name, new Hint(h));
           else
@@ -76,7 +77,7 @@ public class MetadataIndex {
         });
       }
       metadata.getProperties().forEach(p -> {
-        ConfigurationPropertyName name = ConfigurationPropertyName.ofIfValid(p.getName());
+        PropertyName name = PropertyName.ofIfValid(p.getName());
         if (name != null) {
           Property property = new Property(p);
           newProperties.add(property);
@@ -103,7 +104,7 @@ public class MetadataIndex {
 
   @Nullable
   public Group getGroup(String name) {
-    ConfigurationPropertyName key = ConfigurationPropertyName.ofIfValid(name);
+    PropertyName key = PropertyName.ofIfValid(name);
     return key != null ? groups.get(key) : null;
   }
 
@@ -114,7 +115,7 @@ public class MetadataIndex {
 
 
   public Property getProperty(String name) {
-    ConfigurationPropertyName key = ConfigurationPropertyName.ofIfValid(name);
+    PropertyName key = PropertyName.ofIfValid(name);
     return key != null ? properties.get(key) : null;
   }
 
@@ -125,7 +126,7 @@ public class MetadataIndex {
 
 
   public Hint getHint(String name) {
-    ConfigurationPropertyName key = ConfigurationPropertyName.ofIfValid(name);
+    PropertyName key = PropertyName.ofIfValid(name);
     return key != null ? hints.get(key) : null;
   }
 
@@ -136,7 +137,7 @@ public class MetadataIndex {
 
 
   public MetadataItem getPropertyOrGroup(String name) {
-    ConfigurationPropertyName key = ConfigurationPropertyName.ofIfValid(name);
+    PropertyName key = PropertyName.ofIfValid(name);
     if (key == null) return null;
     MetadataItem item = properties.get(key);
     return item != null ? item : groups.get(key);
@@ -161,7 +162,7 @@ public class MetadataIndex {
 
 
   @NotNull
-  private ConfigurationMetadata generateMetadata(ConfigurationMetadata metadata, ConfigurationPropertyName basename, PsiType type) {
+  private ConfigurationMetadata generateMetadata(ConfigurationMetadata metadata, PropertyName basename, PsiType type) {
     if (PsiTypesUtil.classNameEquals(type, "java.util.Map")) {
       if (type instanceof PsiClassType classType) {
         PsiType[] parameters = classType.getParameters();
@@ -192,7 +193,7 @@ public class MetadataIndex {
         // We should not be here
         return metadata;
       }
-      generateMetadata(metadata, basename.append("[#]"), valueType);
+      generateMetadata(metadata, basename.appendAnyNumericalIndex(), valueType);
     } else {
       if (isValueType(type)) return metadata;
       PsiClass valueClass = PsiUtil.resolveClassInType(type);
@@ -200,7 +201,7 @@ public class MetadataIndex {
       for (String fieldName : PropertyUtil.getWritableProperties(valueClass, true)) {
         PsiField field = valueClass.findFieldByName(fieldName, true);
         if (field == null) continue;
-        ConfigurationPropertyName name = basename.append(PropertyName.toKebabCase(fieldName));
+        PropertyName name = basename.append(PropertyName.toKebabCase(fieldName));
         ConfigurationMetadata.Property meta = new ConfigurationMetadata.Property();
         meta.setName(name.toString());
         meta.setType(Objects.requireNonNull(PropertyUtil.getPropertyType(field)).getCanonicalText());
@@ -246,13 +247,13 @@ public class MetadataIndex {
   public class Property implements MetadataProperty {
     @Getter
     private final ConfigurationMetadata.Property metadata;
-    private final ConfigurationPropertyName propertyName;
+    private final PropertyName propertyName;
     private final PsiType propertyType;
 
 
     public Property(ConfigurationMetadata.Property metadata) {
       this.metadata = metadata;
-      this.propertyName = ConfigurationPropertyName.of(metadata.getName());
+      this.propertyName = PropertyName.of(metadata.getName());
       if (StringUtils.isBlank(metadata.getType())) {
         this.propertyType = null;
       } else {
@@ -321,7 +322,7 @@ public class MetadataIndex {
 
 
     private String getFieldName() {
-      return PropertyName.toCamelCase(propertyName.getLastElement(ConfigurationPropertyName.Form.DASHED));
+      return PropertyName.toCamelCase(propertyName.getLastElement(DASHED));
     }
   }
 

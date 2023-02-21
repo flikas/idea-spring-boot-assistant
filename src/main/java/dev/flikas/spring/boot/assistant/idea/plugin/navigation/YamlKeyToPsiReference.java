@@ -42,8 +42,8 @@ public class YamlKeyToPsiReference extends PsiReferenceBase<PsiElement> {
 
     MetadataItem propertyOrGroup = metadata.getPropertyOrGroup(fullName);
     if (propertyOrGroup == null) return null;
-    if (propertyOrGroup instanceof MetadataIndex.Property) {
-      return ((MetadataIndex.Property) propertyOrGroup).getSourceField();
+    if (propertyOrGroup instanceof MetadataIndex.Property property) {
+      return property.getSourceField();
     } else {
       return propertyOrGroup.getType();
     }

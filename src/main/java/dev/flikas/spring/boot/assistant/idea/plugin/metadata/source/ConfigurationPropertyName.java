@@ -50,7 +50,7 @@ import java.util.function.Function;
  * @see ConfigurationPropertySource
  * @since 2.0.0
  */
-class ConfigurationPropertyName implements Comparable<ConfigurationPropertyName> {
+public class ConfigurationPropertyName implements Comparable<ConfigurationPropertyName> {
 
 	/**
 	 * An empty {@link ConfigurationPropertyName}.
@@ -1010,7 +1010,7 @@ class ConfigurationPropertyName implements Comparable<ConfigurationPropertyName>
 	/**
 	 * Main parsing logic used to convert a {@link CharSequence} to {@link Elements}.
 	 */
-	private static class ElementsParser {
+	static class ElementsParser {
 
 		private static final int DEFAULT_CAPACITY = 6;
 
