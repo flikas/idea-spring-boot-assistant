@@ -104,8 +104,8 @@ public class MetadataIndex {
 
   @Nullable
   public Group getGroup(String name) {
-    PropertyName key = PropertyName.ofIfValid(name);
-    return key != null ? groups.get(key) : null;
+    PropertyName key = PropertyName.adapt(name);
+    return groups.get(key);
   }
 
 
@@ -115,8 +115,8 @@ public class MetadataIndex {
 
 
   public Property getProperty(String name) {
-    PropertyName key = PropertyName.ofIfValid(name);
-    return key != null ? properties.get(key) : null;
+    PropertyName key = PropertyName.adapt(name);
+    return properties.get(key);
   }
 
 
@@ -126,8 +126,8 @@ public class MetadataIndex {
 
 
   public Hint getHint(String name) {
-    PropertyName key = PropertyName.ofIfValid(name);
-    return key != null ? hints.get(key) : null;
+    PropertyName key = PropertyName.adapt(name);
+    return hints.get(key);
   }
 
 
@@ -137,8 +137,7 @@ public class MetadataIndex {
 
 
   public MetadataItem getPropertyOrGroup(String name) {
-    PropertyName key = PropertyName.ofIfValid(name);
-    if (key == null) return null;
+    PropertyName key = PropertyName.adapt(name);
     MetadataItem item = properties.get(key);
     return item != null ? item : groups.get(key);
   }
@@ -174,7 +173,7 @@ public class MetadataIndex {
           log.warn(basename + " has unsupported Map key type: " + type);
           return metadata;
         }
-        generateMetadata(metadata, basename.append("[*]"), parameters[1]);
+        generateMetadata(metadata, basename.appendAnyMapKey(), parameters[1]);
       }
     } else if (PsiTypesUtil.classNameEquals(type, "java.util.List")
         || PsiTypesUtil.classNameEquals(type, "java.util.Set")

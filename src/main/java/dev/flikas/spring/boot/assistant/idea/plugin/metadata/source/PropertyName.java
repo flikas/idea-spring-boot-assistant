@@ -1,17 +1,24 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.source;
 
+import net.jcip.annotations.Immutable;
 import org.springframework.util.StringUtils;
 
 import java.util.Locale;
 import java.util.Set;
+import java.util.function.Function;
+
+import static dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationPropertyName.ElementType.NUMERICALLY_INDEXED;
 
 /**
  * A {@linkplain ConfigurationPropertyName} that accepts wildcard index.
  */
+@Immutable
 public class PropertyName extends ConfigurationPropertyName {
   public static final PropertyName EMPTY = new PropertyName(Elements.EMPTY);
 
   private static final Set<Character> SEPARATORS = Set.of('-', '_');
+
+  private int hashCode;
 
 
   private PropertyName(Elements elements) {
@@ -19,11 +26,17 @@ public class PropertyName extends ConfigurationPropertyName {
   }
 
 
+  /**
+   * @see ConfigurationPropertyName#of(CharSequence)
+   */
   public static PropertyName of(String propertyName) {
     return new PropertyName(elementsOf(propertyName, false));
   }
 
 
+  /**
+   * @see ConfigurationPropertyName#ofIfValid(CharSequence)
+   */
   public static PropertyName ofIfValid(String propertyName) {
     Elements elements = elementsOf(propertyName, true);
     return elements != null ? new PropertyName(elements) : null;
@@ -32,6 +45,14 @@ public class PropertyName extends ConfigurationPropertyName {
 
   public static PropertyName ofCamelCase(String camelCase) {
     return of(toKebabCase(camelCase));
+  }
+
+
+  /**
+   * @see ConfigurationPropertyName#adapt(CharSequence, char, Function)
+   */
+  public static PropertyName adapt(String propertyName) {
+    return new PropertyName(adapt(propertyName, '.').elements);
   }
 
 
@@ -74,16 +95,25 @@ public class PropertyName extends ConfigurationPropertyName {
   }
 
 
+  /**
+   * @return a new PropertyName that appends a map key wildcard after this.
+   */
   public PropertyName appendAnyMapKey() {
     return append("[*]");
   }
 
 
+  /**
+   * @return a new PropertyName that appends a numeric index wildcard after this.
+   */
   public PropertyName appendAnyNumericalIndex() {
     return append("[#]");
   }
 
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public PropertyName append(String suffix) {
     if (!StringUtils.hasLength(suffix)) {
@@ -95,6 +125,9 @@ public class PropertyName extends ConfigurationPropertyName {
   }
 
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public PropertyName getParent() {
     int numberOfElements = getNumberOfElements();
@@ -102,6 +135,9 @@ public class PropertyName extends ConfigurationPropertyName {
   }
 
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public PropertyName chop(int size) {
     if (size >= getNumberOfElements()) {
@@ -112,9 +148,9 @@ public class PropertyName extends ConfigurationPropertyName {
   }
 
 
-  private int hashCode;
-
-
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public PropertyName subName(int offset) {
     return new PropertyName(super.subName(offset).elements);
@@ -123,11 +159,11 @@ public class PropertyName extends ConfigurationPropertyName {
 
   @Override
   protected int compare(String e1, ElementType type1, String e2, ElementType type2) {
-    if (e1 != null && e2 != null && type1.isIndexed() && type2.isIndexed()
-        && ((e1.equals("*") && type2 == ElementType.INDEXED && !e2.equals("#"))
-        || (e2.equals("*") && type1 == ElementType.INDEXED && !e1.equals("#"))
-        || (e1.equals("#") && type2 == ElementType.NUMERICALLY_INDEXED)
-        || (e2.equals("#") && type1 == ElementType.NUMERICALLY_INDEXED))) {
+    if (e1 != null && e2 != null
+        && (e1.equals("*") && !e2.equals("#")
+        || e2.equals("*") && !e1.equals("#")
+        || e1.equals("#") && type2 == NUMERICALLY_INDEXED
+        || e2.equals("#") && type1 == NUMERICALLY_INDEXED)) {
       return 0;
     }
     return super.compare(e1, type1, e2, type2);
@@ -138,11 +174,10 @@ public class PropertyName extends ConfigurationPropertyName {
   boolean defaultElementEquals(Elements e1, Elements e2, int i) {
     ElementType type1 = e1.getType(i);
     ElementType type2 = e2.getType(i);
-    if (type1.isIndexed() && type2.isIndexed()
-        && ((type1 == ElementType.INDEXED && e2.getLength(i) == 1 && e2.charAt(i, 0) == '*' && !(e1.getLength(i) == 1 && e1.charAt(i, 0) == '#'))
-        || (type2 == ElementType.INDEXED && e1.getLength(i) == 1 && e1.charAt(i, 0) == '*' && !(e2.getLength(i) == 1 && e2.charAt(i, 0) == '#'))
-        || (type1 == ElementType.NUMERICALLY_INDEXED && e2.getLength(i) == 1 && e2.charAt(i, 0) == '#')
-        || (type2 == ElementType.NUMERICALLY_INDEXED && e1.getLength(i) == 1 && e1.charAt(i, 0) == '#'))) {
+    if (e1.get(i).equals("*") && type2 != NUMERICALLY_INDEXED && !e2.get(i).equals("#")
+        || e2.get(i).equals("*") && type1 != NUMERICALLY_INDEXED && !e1.get(i).equals("#")
+        || type1 == NUMERICALLY_INDEXED && e2.get(i).equals("#")
+        || type2 == NUMERICALLY_INDEXED && e1.get(i).equals("#")) {
       return true;
     }
     return super.defaultElementEquals(e1, e2, i);
@@ -154,24 +189,11 @@ public class PropertyName extends ConfigurationPropertyName {
    */
   @Override
   public int hashCode() {
-    int hc = this.hashCode;
+    //Because we support map key wildcards(a[b] == a.b), we can do nothing but this.
     Elements elements = this.elements;
-    if (hc == 0 && elements.getSize() != 0) {
-      for (int elementIndex = 0; elementIndex < elements.getSize(); elementIndex++) {
-        int elementHashCode = 0;
-        if (elements.getType(elementIndex).isIndexed()) continue;
-        int length = elements.getLength(elementIndex);
-        for (int i = 0; i < length; i++) {
-          char ch = elements.charAt(elementIndex, i);
-          ch = Character.toLowerCase(ch);
-          if (ElementsParser.isAlphaNumeric(ch)) {
-            elementHashCode = 31 * elementHashCode + ch;
-          }
-        }
-        hc = 31 * hc + elementHashCode;
-      }
-      this.hashCode = hc;
+    if (this.hashCode == 0 && elements.getSize() != 0) {
+      this.hashCode = elements.getSize();
     }
-    return hc;
+    return this.hashCode;
   }
 }
