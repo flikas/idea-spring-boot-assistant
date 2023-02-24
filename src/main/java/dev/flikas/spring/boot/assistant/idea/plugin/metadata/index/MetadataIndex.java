@@ -120,6 +120,16 @@ public class MetadataIndex {
   }
 
 
+  public Property getNearstParentProperty(String name) {
+    PropertyName key = PropertyName.adapt(name);
+    Property property = null;
+    while (key != null && !key.isEmpty() && (property = properties.get(key)) == null) {
+      key = key.getParent();
+    }
+    return property;
+  }
+
+
   public Collection<Property> getProperties() {
     return properties.values();
   }
@@ -225,7 +235,8 @@ public class MetadataIndex {
 
 
   private static boolean isValueType(PsiType type) {
-    return TypeConversionUtil.isAssignableFromPrimitiveWrapper(type)
+    return isPhysical(type)
+        && (TypeConversionUtil.isAssignableFromPrimitiveWrapper(type)
         || TypeConversionUtil.isPrimitiveAndNotNullOrWrapper(type)
         || TypeConversionUtil.isEnumType(type)
         || PsiTypesUtil.classNameEquals(type, "java.lang.String")
@@ -236,8 +247,28 @@ public class MetadataIndex {
         || PsiTypesUtil.classNameEquals(type, "java.net.URL")
         || PsiTypesUtil.classNameEquals(type, "java.net.InetAddress")
         || PsiTypesUtil.classNameEquals(type, "org.springframework.util.unit.DataSize")
-        || PsiTypesUtil.classNameEquals(type, "org.springframework.core.io.Resource");
+        || PsiTypesUtil.classNameEquals(type, "org.springframework.core.io.Resource")
+        || canConvertFromString(type));
 
+  }
+
+
+  private static boolean isPhysical(PsiType type) {
+    PsiClass psiClass = PsiTypesUtil.getPsiClass(type);
+    if (psiClass == null) return false;
+    return type.isValid() && psiClass.isPhysical();
+  }
+
+
+  private static boolean canConvertFromString(PsiType type) {
+    if (type instanceof PsiClassType classType) {
+      PsiClass psiClass = classType.resolve();
+      if (psiClass == null) return false;
+      return Arrays.stream(psiClass.getConstructors()).anyMatch(
+          m -> m.getParameterList().getParametersCount() == 1
+              && PsiTypesUtil.classNameEquals(m.getParameterList().getParameter(0).getType(), "java.lang.String"));
+    }
+    return false;
   }
 
 

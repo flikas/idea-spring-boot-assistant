@@ -19,7 +19,7 @@ public class ServiceUtil {
       return null;
     }
     FileTypeManager ftm = FileTypeManager.getInstance();
-    if (!ftm.isFileOfType(virtualFile, YamlPropertiesFileType.INSTANCE)) {
+    if (!ftm.isFileOfType(virtualFile, requiredFileType)) {
       return null;
     }
     Module module = ModuleUtil.findModuleForFile(file);

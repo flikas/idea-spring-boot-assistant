@@ -25,8 +25,8 @@ public class YamlReferenceContributor extends PsiReferenceContributor {
       @Override
       public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element,
                                                              @NotNull ProcessingContext context) {
-        if (element instanceof YAMLKeyValue) {
-          return new YamlKeyToPsiReference[]{new YamlKeyToPsiReference((YAMLKeyValue) element)};
+        if (element instanceof YAMLKeyValue yamlKeyValue) {
+          return new YamlKeyToPsiReference[]{new YamlKeyToPsiReference(yamlKeyValue)};
         } else {
           return PsiReference.EMPTY_ARRAY;
         }
