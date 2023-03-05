@@ -37,11 +37,14 @@ public class KeyNotDefinedInspection extends LocalInspectionTool {
         if (keyValue.getKey() == null) return;
         if (keyValue.getValue() instanceof YAMLCompoundValue) return;
         String fullName = YAMLUtil.getConfigFullName(keyValue);
-        MetadataIndex.Property property = service.getIndex().getNearstParentProperty(fullName);
-        if (property != null){
-          
+        MetadataIndex.Property property = service.getIndex().getProperty(fullName);
+        if (property != null) {
+          // Property is defined
+          return;
         }
-        if (property == null) {
+        // Property is not defined, but maybe its parent has a Map<String,String> or Properties type.
+        property = service.getIndex().getNearstParentProperty(fullName);
+        if (property == null || !property.canBind(fullName)) {
           holder.registerProblem(
               keyValue.getKey(),
               YAMLBundle.message("YamlUnknownKeysInspectionBase.unknown.key", keyValue.getKeyText())

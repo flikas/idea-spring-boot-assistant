@@ -1,6 +1,7 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.service;
 
 import com.intellij.ProjectTopics;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
@@ -30,11 +31,11 @@ class ModuleMetadataServiceImpl implements ModuleMetadataService {
     module.getProject().getMessageBus().connect().subscribe(ProjectTopics.PROJECT_ROOTS, new ModuleRootListener() {
       @Override
       public void rootsChanged(@NotNull ModuleRootEvent event) {
-        refreshMetadata();
+        ReadAction.run(ModuleMetadataServiceImpl.this::refreshMetadata);
       }
     });
     // read metadata for the first time
-    refreshMetadata();
+    ReadAction.run(this::refreshMetadata);
   }
 
 

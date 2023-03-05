@@ -21,10 +21,8 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Stream;
 
 @Service
 public final class ProjectMetadataService {
@@ -82,11 +80,20 @@ public final class ProjectMetadataService {
 
     public void reload() {
       MetadataIndex meta = new MetadataIndex(project);
-      this.metadataFiles = Stream.of(
-              findMetadata(root, METADATA_FILE, meta),
-              findMetadata(root, ADDITIONAL_METADATA_FILE, meta))
-          .filter(Objects::nonNull)
-          .toList();
+      List<VirtualFile> files = new ArrayList<>();
+      VirtualFile vf = findMetadata(root, METADATA_FILE, meta);
+      if (vf != null) {
+        files.add(vf);
+      } else {
+        // Some package has additional metadata file only, so we have to load it,
+        // otherwise, spring-configuration-processor should merge additional metadata to the main one,
+        // thus, the additional metadata file should not be load.
+        vf = findMetadata(root, ADDITIONAL_METADATA_FILE, meta);
+        if (vf != null) {
+          files.add(vf);
+        }
+      }
+      this.metadataFiles = files;
       this.metadata = meta;
     }
 
