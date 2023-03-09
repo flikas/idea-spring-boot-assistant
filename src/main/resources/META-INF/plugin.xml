@@ -88,7 +88,7 @@
               implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.suggestion.filetype.YamlPropertiesFileType"
               fieldName="INSTANCE"
               fileNames="application.yml;application.yaml"
-              patterns="application-*.yaml;application-*.yml;bootstrap.yml;bootstrap.yaml"/>
+              patterns="application-*.yaml;application-*.yml;bootstrap.yml;bootstrap-*.yml;bootstrap.yaml;bootstrap-*.yaml"/>
     <psi.referenceContributor
         implementation="dev.flikas.spring.boot.assistant.idea.plugin.suggestion.reference.YamlReferenceContributor"/>
     <!--<completion.contributor language="Properties"-->
