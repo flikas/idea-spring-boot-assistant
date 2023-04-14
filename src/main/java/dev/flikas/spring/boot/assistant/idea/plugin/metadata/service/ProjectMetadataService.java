@@ -10,17 +10,24 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.newvfs.BulkFileListener;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
+import com.intellij.psi.PsiType;
+import com.intellij.psi.util.PsiUtil;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.ClassMetadataIndex;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.FileMetadataIndex;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyTypeUtil;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -29,7 +36,7 @@ public final class ProjectMetadataService {
   public static final String METADATA_FILE = "META-INF/spring-configuration-metadata.json";
   public static final String ADDITIONAL_METADATA_FILE = "META-INF/additional-spring-configuration-metadata.json";
 
-  private static final Logger LOG = Logger.getInstance(ProjectMetadataService.class);
+  private final Logger log = Logger.getInstance(ProjectMetadataService.class);
 
   private final Project project;
 
@@ -68,7 +75,6 @@ public final class ProjectMetadataService {
   @Data
   private class MetadataFileRoot {
     private final VirtualFile root;
-    private Collection<VirtualFile> metadataFiles;
     private MetadataIndex metadata;
 
 
@@ -79,35 +85,53 @@ public final class ProjectMetadataService {
 
 
     public void reload() {
-      MetadataIndex meta = new MetadataIndex(project);
-      List<VirtualFile> files = new ArrayList<>();
-      VirtualFile vf = findMetadata(root, METADATA_FILE, meta);
-      if (vf != null) {
-        files.add(vf);
-      } else {
+      FileMetadataIndex fmi = findMetadata(root, METADATA_FILE);
+      if (fmi == null) {
         // Some package has additional metadata file only, so we have to load it,
         // otherwise, spring-configuration-processor should merge additional metadata to the main one,
         // thus, the additional metadata file should not be load.
-        vf = findMetadata(root, ADDITIONAL_METADATA_FILE, meta);
-        if (vf != null) {
-          files.add(vf);
+        fmi = findMetadata(root, ADDITIONAL_METADATA_FILE);
+      }
+      if (fmi != null) {
+        this.metadata = fmi;
+        // Spring does not create metadata for types in collections, we should create it by ourselves and expand our index,
+        // to better support code-completion, documentation, navigation, etc.
+        for (MetadataProperty property : this.metadata.getProperties()) {
+          resolvePropertyType(property);
         }
       }
-      this.metadataFiles = files;
-      this.metadata = meta;
     }
 
 
-    private VirtualFile findMetadata(VirtualFile root, String metaFile, MetadataIndex metadata) {
+    /**
+     * @see ConfigurationMetadata.Property#getType()
+     */
+    @Nullable
+    private void resolvePropertyType(MetadataProperty property) {
+      @Nullable PsiType type = property.getFullType();
+      if (type == null || !type.isValid()) return;
+      if (PropertyTypeUtil.isCollection(project, type)) {
+        //TODO add ProjectClassMetadataService，缓存和监视类的属性
+        Map<String, ClassMetadataIndex> map = ClassMetadataIndex.fromType(project, type);
+
+        ConfigurationMetadata metadata = generateMetadata(new ConfigurationMetadata(), property.getPropertyName(), type);
+      } else if (PsiUtil.resolveClassInType(type) != null && !PropertyTypeUtil.isValueType(type)) {
+        log.warn(property.getName() + " has unsupported type: " + type.getCanonicalText());
+      }
+    }
+
+
+    @Nullable
+    private FileMetadataIndex findMetadata(VirtualFile root, String metaFile) {
       VirtualFile file = VfsUtilCore.findRelativeFile(metaFile, root);
       if (file != null) {
         try {
-          metadata.merge(file.getUrl(), readJson(file));
+          return new FileMetadataIndex(project, file.getUrl(), readJson(file));
         } catch (IOException e) {
-          LOG.warn("Read metadata file " + file + " failed", e);
+          log.warn("Read metadata file " + file + " failed", e);
         }
       }
-      return file;
+      return null;
     }
 
 

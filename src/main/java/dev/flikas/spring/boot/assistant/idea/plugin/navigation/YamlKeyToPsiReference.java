@@ -7,6 +7,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReferenceBase;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataItem;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +43,7 @@ public class YamlKeyToPsiReference extends PsiReferenceBase<PsiElement> {
 
     MetadataItem propertyOrGroup = metadata.getPropertyOrGroup(fullName);
     if (propertyOrGroup == null) return null;
-    if (propertyOrGroup instanceof MetadataIndex.Property property) {
+    if (propertyOrGroup instanceof MetadataProperty property) {
       return property.getSourceField();
     } else {
       return propertyOrGroup.getType();

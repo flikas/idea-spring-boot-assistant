@@ -11,7 +11,8 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
-import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataGroup;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -70,7 +71,7 @@ public final class PsiToYamlKeyReferenceService {
     if (kv.getKey() == null) return;
     String fullName = YAMLUtil.getConfigFullName(kv);
     // find if any property matches this key
-    MetadataIndex.Property property = metadataService.getIndex().getProperty(fullName);
+    MetadataProperty property = metadataService.getIndex().getProperty(fullName);
     if (property != null) {
       PsiField sourceField = property.getSourceField();
       if (sourceField != null) {
@@ -81,7 +82,7 @@ public final class PsiToYamlKeyReferenceService {
       }
     }
     // find if any group matches this key
-    MetadataIndex.Group group = metadataService.getIndex().getGroup(fullName);
+    MetadataGroup group = metadataService.getIndex().getGroup(fullName);
     if (group != null) {
       PsiClass type = group.getType();
       if (type != null) {

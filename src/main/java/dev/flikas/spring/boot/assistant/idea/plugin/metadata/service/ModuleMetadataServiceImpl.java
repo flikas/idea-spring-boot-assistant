@@ -9,6 +9,7 @@ import com.intellij.openapi.roots.ModuleRootEvent;
 import com.intellij.openapi.roots.ModuleRootListener;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.FileMetadataIndex;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,7 +55,7 @@ class ModuleMetadataServiceImpl implements ModuleMetadataService {
     }
     Project project = this.module.getProject();
     ProjectMetadataService pms = project.getService(ProjectMetadataService.class);
-    MetadataIndex meta = new MetadataIndex(project);
+    FileMetadataIndex meta = new FileMetadataIndex(project);
     for (VirtualFile root : roots) {
       meta.merge(pms.getMetadata(root));
     }

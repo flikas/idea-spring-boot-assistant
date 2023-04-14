@@ -25,15 +25,17 @@ public interface MetadataProperty extends MetadataItem {
   /**
    * get hint or value hint for this property.
    */
-  @Nullable MetadataIndex.Hint getHint();
+  @Nullable MetadataHint getHint();
 
   /**
    * get key hint for this property if it is a Map.
    */
-  @Nullable MetadataIndex.Hint getKeyHint();
+  @Nullable MetadataHint getKeyHint();
 
   /**
    * @return whether the specified key can be bound to this property.
    */
   boolean canBind(@NotNull String key);
+
+  ConfigurationMetadata.Property getMetadata();
 }

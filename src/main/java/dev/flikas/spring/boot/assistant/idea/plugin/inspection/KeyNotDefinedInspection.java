@@ -7,7 +7,7 @@ import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.progress.ProgressIndicatorProvider;
 import com.intellij.psi.PsiElementVisitor;
 import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
-import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService;
 import dev.flikas.spring.boot.assistant.idea.plugin.misc.ServiceUtil;
 import org.jetbrains.annotations.NotNull;
@@ -37,13 +37,13 @@ public class KeyNotDefinedInspection extends LocalInspectionTool {
         if (keyValue.getKey() == null) return;
         if (keyValue.getValue() instanceof YAMLCompoundValue) return;
         String fullName = YAMLUtil.getConfigFullName(keyValue);
-        MetadataIndex.Property property = service.getIndex().getProperty(fullName);
+        MetadataProperty property = service.getIndex().getProperty(fullName);
         if (property != null) {
           // Property is defined
           return;
         }
         // Property is not defined, but maybe its parent has a Map<String,String> or Properties type.
-        property = service.getIndex().getNearstParentProperty(fullName);
+        property = service.getIndex().getNearestParentProperty(fullName);
         if (property == null || !property.canBind(fullName)) {
           holder.registerProblem(
               keyValue.getKey(),
