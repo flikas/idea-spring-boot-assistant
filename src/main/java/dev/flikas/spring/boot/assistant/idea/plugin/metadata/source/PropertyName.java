@@ -80,7 +80,7 @@ public class PropertyName extends ConfigurationPropertyName {
     StringBuilder dashed = new StringBuilder();
     Character previous = null;
     for (int i = 0; i < camelCase.length(); i++) {
-      char current = camelCase.charAt(i);
+      Character current = camelCase.charAt(i);
       if (SEPARATORS.contains(current)) {
         dashed.append("-");
       } else if (Character.isUpperCase(current) && previous != null && !SEPARATORS.contains(previous)) {

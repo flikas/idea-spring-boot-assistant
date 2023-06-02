@@ -11,11 +11,7 @@ import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.newvfs.BulkFileListener;
 import com.intellij.openapi.vfs.newvfs.events.VFileEvent;
 import com.intellij.psi.PsiType;
-import com.intellij.psi.util.PsiUtil;
-import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.ClassMetadataIndex;
-import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.FileMetadataIndex;
-import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
-import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.*;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyTypeUtil;
 import lombok.Data;
@@ -26,8 +22,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -93,12 +90,13 @@ public final class ProjectMetadataService {
         fmi = findMetadata(root, ADDITIONAL_METADATA_FILE);
       }
       if (fmi != null) {
-        this.metadata = fmi;
+        AggregatedMetadataIndex index = new AggregatedMetadataIndex(Collections.singleton(fmi));
         // Spring does not create metadata for types in collections, we should create it by ourselves and expand our index,
         // to better support code-completion, documentation, navigation, etc.
         for (MetadataProperty property : this.metadata.getProperties()) {
-          resolvePropertyType(property);
+          resolvePropertyType(property).ifPresent(index::addFirst);
         }
+        this.metadata = index;
       }
     }
 
@@ -106,18 +104,14 @@ public final class ProjectMetadataService {
     /**
      * @see ConfigurationMetadata.Property#getType()
      */
-    @Nullable
-    private void resolvePropertyType(MetadataProperty property) {
-      @Nullable PsiType type = property.getFullType();
-      if (type == null || !type.isValid()) return;
-      if (PropertyTypeUtil.isCollection(project, type)) {
-        //TODO add ProjectClassMetadataService，缓存和监视类的属性
-        Map<String, ClassMetadataIndex> map = ClassMetadataIndex.fromType(project, type);
-
-        ConfigurationMetadata metadata = generateMetadata(new ConfigurationMetadata(), property.getPropertyName(), type);
-      } else if (PsiUtil.resolveClassInType(type) != null && !PropertyTypeUtil.isValueType(type)) {
-        log.warn(property.getName() + " has unsupported type: " + type.getCanonicalText());
-      }
+    @NotNull
+    private Optional<MetadataIndex> resolvePropertyType(MetadataProperty property) {
+      return Optional.ofNullable(property)
+          .map(MetadataProperty::getFullType)
+          .filter(PsiType::isValid)
+          .filter(t -> PropertyTypeUtil.isCollection(project, t))
+          .flatMap(t -> project.getService(ProjectClassMetadataService.class).getMetadata(t))
+          .map(idx -> new MetadataIndexBaseNameWrapper(property.getName(), idx));
     }
 
 
