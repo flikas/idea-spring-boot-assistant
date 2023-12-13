@@ -26,7 +26,7 @@ import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringCon
 import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataValueProviderTypeDeserializer;
 import org.apache.commons.collections4.Trie;
 import org.apache.commons.collections4.trie.PatriciaTrie;
-import org.apache.commons.lang.time.StopWatch;
+import org.apache.commons.lang3.time.StopWatch;
 
 import javax.annotation.Nullable;
 import java.io.BufferedReader;

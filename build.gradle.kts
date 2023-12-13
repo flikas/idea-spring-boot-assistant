@@ -13,7 +13,7 @@ java {
 }
 
 group = "dev.flikas"
-version = "222.17.2"
+version = "222.17.3"
 
 repositories {
     mavenCentral()
@@ -21,6 +21,7 @@ repositories {
 
 dependencies {
     implementation("org.apache.commons", "commons-collections4", "4.4")
+    implementation("org.apache.commons", "commons-lang3", "3.14.0")
     implementation("com.miguelfonseca.completely", "completely-core", "0.9.0")
 
     testImplementation("org.junit.jupiter", "junit-jupiter-api", "5.8.1")

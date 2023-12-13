@@ -25,6 +25,10 @@ to [Semantic Versioning](https://semver.org).
 
 ### Fixed
 
+## [222.17.3] - 2023-12-13
+
+- Fix `StopWatch` class not found in IDEA `2023.3`
+
 ### Security
 
 ## [222.17.2] - 2023-02-04
