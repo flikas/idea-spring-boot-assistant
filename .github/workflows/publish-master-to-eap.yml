@@ -28,13 +28,13 @@ jobs:
           settings-path: ${{ github.workspace }} # location for the settings.xml file
           cache: gradle
       - name: Build with Gradle
-        run: gradlew buildPlugin
+        run: ./gradlew buildPlugin
       - name: Run Plugin Verifier
-        run: gradlew runPluginVerifier
+        run: ./gradlew runPluginVerifier
       # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
       # the publishing section of your build.gradle
       - name: Publish to JetBrains Marketplace
-        run: gradlew publishPlugin
+        run: ./gradlew publishPlugin
         env:
           PUBLISH_TOKEN: ${{ secrets.PUBLISH_TOKEN }}
           PRIVATE_KEY_PASSWORD: ${{ secrets.PRIVATE_KEY_PASSWORD }}
