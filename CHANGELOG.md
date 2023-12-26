@@ -27,7 +27,8 @@ to [Semantic Versioning](https://semver.org).
 
 ## [222.17.3] - 2023-12-13
 
-- Fix `StopWatch` class not found in IDEA `2023.3`
+- Fix `StopWatch` class not found in IDEA `2023.3`. -- Thanks to @enix223
+- Supports `bootstrap-*.yml/yaml` by default. -- Thanks to @skyjilygao
 
 ### Security
 
