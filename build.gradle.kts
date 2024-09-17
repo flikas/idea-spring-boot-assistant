@@ -39,6 +39,7 @@ dependencies {
         jetbrainsRuntime("21.0.4b598.4")
         instrumentationTools()
         pluginVerifier()
+        zipSigner()
     }
 
     implementation("org.apache.commons", "commons-collections4", "4.4")
