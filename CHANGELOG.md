@@ -18,7 +18,7 @@ to [Semantic Versioning](https://semver.org).
 
 ### Security
 
-## [242.1.0] - 2024-09-17
+## 242.1.0 - 2024-09-17
 
 ### Fixed
 

@@ -58,7 +58,7 @@ intellijPlatform {
     pluginConfiguration {
         ideaVersion {
             sinceBuild = "242"
-            untilBuild = ""
+            untilBuild = provider { null }
         }
     }
     pluginVerification {
@@ -67,7 +67,7 @@ intellijPlatform {
                 types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
                 channels = listOf(ProductRelease.Channel.RELEASE)
                 sinceBuild = "242"
-                untilBuild = ""
+                untilBuild = provider { null }
             }
         }
     }
