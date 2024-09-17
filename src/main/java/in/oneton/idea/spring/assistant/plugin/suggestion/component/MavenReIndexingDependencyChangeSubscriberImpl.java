@@ -10,6 +10,10 @@ import com.intellij.util.messages.MessageBusConnection;
 import in.oneton.idea.spring.assistant.plugin.suggestion.service.ProjectSuggestionService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.idea.maven.project.MavenImportListener;
+import org.jetbrains.idea.maven.project.MavenProject;
+
+import java.util.Collection;
+import java.util.List;
 
 import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.moduleNamesAsStrCommaDelimited;
 
@@ -27,31 +31,34 @@ public class MavenReIndexingDependencyChangeSubscriberImpl implements StartupAct
       debug(() -> log
           .debug("Subscribing to maven dependency updates for project " + project.getName()));
       MessageBusConnection connection = project.getMessageBus().connect();
-      connection.subscribe(MavenImportListener.TOPIC, (MavenImportListener) (importedProjects, newModules) -> {
-        boolean proceed = importedProjects.stream().anyMatch(
-            p -> project.getName().equals(p.getDisplayName()) && p.getDirectory().equals(project.getBasePath()));
+      connection.subscribe(MavenImportListener.TOPIC, new MavenImportListener() {
+        @Override
+        public void importFinished(@NotNull Collection<MavenProject> importedProjects, @NotNull List<@NotNull Module> newModules) {
+          boolean proceed = importedProjects.stream().anyMatch(
+              p -> project.getName().equals(p.getDisplayName()) && p.getDirectory().equals(project.getBasePath()));
 
-        if (proceed) {
-          debug(() -> log.debug("Maven dependencies are updated for project " + project.getName()));
-          DumbService.getInstance(project).smartInvokeLater(() -> {
-            log.debug("Will attempt to trigger indexing for project " + project.getName());
-            try {
-              Module[] modules = ModuleManager.getInstance(project).getModules();
-              if (modules.length > 0) {
-                service.reindex(modules);
-              } else {
-                debug(() -> log.debug("Skipping indexing for project " + project.getName()
-                    + " as there are no modules"));
+          if (proceed) {
+            debug(() -> log.debug("Maven dependencies are updated for project " + project.getName()));
+            DumbService.getInstance(project).smartInvokeLater(() -> {
+              log.debug("Will attempt to trigger indexing for project " + project.getName());
+              try {
+                Module[] modules = ModuleManager.getInstance(project).getModules();
+                if (modules.length > 0) {
+                  service.reindex(modules);
+                } else {
+                  debug(() -> log.debug("Skipping indexing for project " + project.getName()
+                      + " as there are no modules"));
+                }
+              } catch (Throwable e) {
+                log.error("Error occurred while indexing project " + project.getName() + " & modules "
+                    + moduleNamesAsStrCommaDelimited(newModules, false), e);
               }
-            } catch (Throwable e) {
-              log.error("Error occurred while indexing project " + project.getName() + " & modules "
-                  + moduleNamesAsStrCommaDelimited(newModules, false), e);
-            }
-          });
-        } else {
-          log.debug(
-              "Skipping indexing as none of the imported projects match our project " + project
-                  .getName());
+            });
+          } else {
+            log.debug(
+                "Skipping indexing as none of the imported projects match our project " + project
+                    .getName());
+          }
         }
       });
     } catch (Throwable e) {

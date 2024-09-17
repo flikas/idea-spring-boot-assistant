@@ -2,6 +2,7 @@ package in.oneton.idea.spring.assistant.plugin.suggestion.clazz;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiType;
+import com.intellij.psi.PsiTypes;
 import in.oneton.idea.spring.assistant.plugin.suggestion.Suggestion;
 import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode;
 import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNodeType;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 
-import static com.intellij.codeInsight.documentation.DocumentationManager.createHyperlink;
+import static com.intellij.codeInsight.documentation.DocumentationManagerUtil.createHyperlink;
 import static com.intellij.openapi.util.text.StringUtil.isEmpty;
 import static com.intellij.psi.CommonClassNames.JAVA_LANG_STRING;
 import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.dotDelimitedOriginalNames;
@@ -29,7 +30,7 @@ import static in.oneton.idea.spring.assistant.plugin.misc.PsiCustomUtil.toClassN
  */
 public class DummyClassMetadata extends ClassMetadata {
 
-  private SuggestionNodeType nodeType;
+  private final SuggestionNodeType nodeType;
 
   DummyClassMetadata(@NotNull SuggestionNodeType nodeType) {
     this.nodeType = nodeType;
@@ -177,19 +178,19 @@ public class DummyClassMetadata extends ClassMetadata {
   public PsiType getPsiType(Module module) {
     switch (nodeType) {
       case BYTE:
-        return PsiType.BYTE;
+        return PsiTypes.byteType();
       case SHORT:
-        return PsiType.SHORT;
+        return PsiTypes.shortType();
       case INT:
-        return PsiType.INT;
+        return PsiTypes.intType();
       case LONG:
-        return PsiType.LONG;
+        return PsiTypes.longType();
       case FLOAT:
-        return PsiType.FLOAT;
+        return PsiTypes.floatType();
       case DOUBLE:
-        return PsiType.DOUBLE;
+        return PsiTypes.doubleType();
       case CHAR:
-        return PsiType.CHAR;
+        return PsiTypes.charType();
       case STRING:
         return safeGetValidType(module, JAVA_LANG_STRING);
       case UNKNOWN_CLASS:
@@ -249,7 +250,7 @@ public class DummyClassMetadata extends ClassMetadata {
         String classFqn = toClassFqn(psiType);
         StringBuilder linkBuilder = new StringBuilder();
         createHyperlink(linkBuilder, classFqn, classFqn, false);
-        builder.append(" (").append(linkBuilder.toString()).append(")");
+        builder.append(" (").append(linkBuilder).append(")");
       }
 
       return builder.toString();
