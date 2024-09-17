@@ -2,6 +2,7 @@ package in.oneton.idea.spring.assistant.plugin.suggestion.clazz;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.psi.PsiType;
+import com.intellij.psi.PsiTypes;
 import in.oneton.idea.spring.assistant.plugin.suggestion.Suggestion;
 import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode;
 import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNodeType;
@@ -20,7 +21,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
-import static com.intellij.codeInsight.documentation.DocumentationManager.createHyperlink;
+import static com.intellij.codeInsight.documentation.DocumentationManagerUtil.createHyperlink;
 import static com.intellij.util.containers.ContainerUtil.isEmpty;
 import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.dotDelimitedOriginalNames;
 import static in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNodeType.BOOLEAN;
@@ -130,10 +131,10 @@ public class BooleanClassMetadata extends ClassMetadata {
     StringBuilder builder =
         new StringBuilder().append("<b>").append(nodeNavigationPathDotDelimited).append("</b>");
 
-    String classFqn = PsiType.BOOLEAN.getBoxedTypeName();
+    String classFqn = PsiTypes.booleanType().getBoxedTypeName();
     StringBuilder linkBuilder = new StringBuilder();
     createHyperlink(linkBuilder, classFqn, classFqn, false);
-    builder.append(" (").append(linkBuilder.toString()).append(")");
+    builder.append(" (").append(linkBuilder).append(")");
 
     builder.append("<p>").append(originalValue).append("</p>");
 
@@ -222,7 +223,7 @@ public class BooleanClassMetadata extends ClassMetadata {
       String classFqn = PsiType.BOOLEAN.getBoxedTypeName();
       StringBuilder linkBuilder = new StringBuilder();
       createHyperlink(linkBuilder, classFqn, classFqn, false);
-      builder.append(" (").append(linkBuilder.toString()).append(")");
+      builder.append(" (").append(linkBuilder).append(")");
 
       return builder.toString();
     }

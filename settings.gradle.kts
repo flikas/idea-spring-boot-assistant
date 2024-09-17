@@ -1,8 +1,8 @@
 pluginManagement {
     plugins {
-        id("org.jetbrains.intellij") version "1.10.0"
-        id("org.jetbrains.changelog") version "1.3.1"
-        id("io.freefair.lombok") version "6.4.3"
+        id("org.jetbrains.intellij.platform") version "2.0.1"
+        id("org.jetbrains.changelog") version "2.2.1"
+        id("io.freefair.lombok") version "8.10"
     }
 }
 rootProject.name = "idea-spring-boot-assistant"

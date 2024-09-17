@@ -17,3 +17,4 @@ out/
 /chain.crt
 /private.pem
 /cache
+/.intellijPlatform

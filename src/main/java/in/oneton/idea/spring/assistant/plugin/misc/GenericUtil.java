@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.intellij.codeInsight.completion.CompletionUtilCore.DUMMY_IDENTIFIER_TRIMMED;
-import static com.intellij.codeInsight.documentation.DocumentationManager.createHyperlink;
+import static com.intellij.codeInsight.documentation.DocumentationManagerUtil.createHyperlink;
 import static com.intellij.openapi.util.text.StringUtil.containsChar;
 import static com.intellij.openapi.util.text.StringUtil.endsWithChar;
 import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;

@@ -28,7 +28,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
-import static com.intellij.codeInsight.documentation.DocumentationManager.createHyperlink;
+import static com.intellij.codeInsight.documentation.DocumentationManagerUtil.createHyperlink;
 import static com.intellij.lang.documentation.DocumentationMarkup.CONTENT_END;
 import static com.intellij.lang.documentation.DocumentationMarkup.CONTENT_START;
 import static com.intellij.lang.documentation.DocumentationMarkup.DEFINITION_END;
