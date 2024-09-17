@@ -1,7 +1,9 @@
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.date
 import org.jetbrains.changelog.markdownToHTML
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 
 plugins {
     java
@@ -36,6 +38,7 @@ dependencies {
         testFramework(TestFrameworkType.Platform)
         jetbrainsRuntime("21.0.4b598.4")
         instrumentationTools()
+        pluginVerifier()
     }
 
     implementation("org.apache.commons", "commons-collections4", "4.4")
@@ -50,14 +53,31 @@ changelog {
     header.set(provider { "[${version.get()}] - ${date()}" })
 }
 
+intellijPlatform {
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = "242"
+            untilBuild = ""
+        }
+    }
+    pluginVerification {
+        ides {
+            select {
+                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
+                channels = listOf(ProductRelease.Channel.RELEASE)
+                sinceBuild = "242"
+                untilBuild = ""
+            }
+        }
+    }
+}
+
 tasks {
     wrapper {
         distributionType = Wrapper.DistributionType.ALL
     }
 
     patchPluginXml {
-        sinceBuild.set("242")
-        untilBuild.set("")
         pluginVersion.set(
             project.version.toString().run {
                 val pieces = split('-')

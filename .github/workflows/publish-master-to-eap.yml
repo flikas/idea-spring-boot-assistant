@@ -29,8 +29,9 @@ jobs:
           cache: gradle
       - name: Build with Gradle
         run: ./gradlew buildPlugin
-      - name: Run Plugin Verifier
-        run: ./gradlew runPluginVerifier
+      # FIXME: Do not verify plugin for known problem: https://youtrack.jetbrains.com/issue/MP-6708
+      #      - name: Run Plugin Verifier
+      #        run: ./gradlew verifyPlugin
       # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
       # the publishing section of your build.gradle
       - name: Publish to JetBrains Marketplace
