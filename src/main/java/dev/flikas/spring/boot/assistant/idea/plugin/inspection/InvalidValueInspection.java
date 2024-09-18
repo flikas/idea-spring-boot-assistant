@@ -20,6 +20,7 @@ import in.oneton.idea.spring.assistant.plugin.suggestion.clazz.MetadataProxy;
 import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.MetadataPropertySuggestionNode;
 import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataProperty;
 import in.oneton.idea.spring.assistant.plugin.suggestion.service.SuggestionService;
+import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
 import org.jetbrains.yaml.psi.YamlPsiElementVisitor;
@@ -33,6 +34,9 @@ import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.truncateId
 import static java.util.Objects.requireNonNull;
 
 public class InvalidValueInspection extends LocalInspectionTool {
+  private static final Pattern SPRING_BOOT_PLACEHOLDER_EXPRESSION = Pattern.compile("\\$\\{.+}");
+  private static final Pattern SPRING_BOOT_PLACEHOLDER_ONLY_EXPRESSION = Pattern.compile("\\$\\{[^:]+}");
+
   @Override
   public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
     SuggestionService service = ServiceUtil.getServiceFromEligibleFile(
@@ -95,10 +99,23 @@ public class InvalidValueInspection extends LocalInspectionTool {
           }
         });
         if (primitiveValueType == null) return;
+
+        String propertyValue = keyValue.getValueText();
+
+        if (isValueSpringBootPlaceholderExpression(propertyValue)) {
+          if (isValueSpringBootPlaceholderOnlyExpression(propertyValue)) {
+            return;
+          }
+
+          int startIndex = propertyValue.indexOf(':') + 1;
+          int endIndex = propertyValue.lastIndexOf('}');
+          propertyValue = propertyValue.substring(startIndex, endIndex);
+        }
+
         try {
           Class<?> valueClass = Class.forName(primitiveValueType.getBoxedTypeName());
           Constructor<?> constructor = valueClass.getConstructor(String.class);
-          constructor.newInstance(keyValue.getValueText());
+          constructor.newInstance(propertyValue);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException e) {
           throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
@@ -108,6 +125,14 @@ public class InvalidValueInspection extends LocalInspectionTool {
               "Value \"" + keyValue.getValueText() + "\" cannot be converted to: " + primitiveValueType.getName()
           );
         }
+      }
+
+      private boolean isValueSpringBootPlaceholderExpression(String value) {
+        return SPRING_BOOT_PLACEHOLDER_EXPRESSION.matcher(value).matches();
+      }
+
+      private boolean isValueSpringBootPlaceholderOnlyExpression(String value) {
+        return SPRING_BOOT_PLACEHOLDER_ONLY_EXPRESSION.matcher(value).matches();
       }
     };
   }
