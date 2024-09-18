@@ -18,6 +18,12 @@ to [Semantic Versioning](https://semver.org).
 
 ### Security
 
+## 242.2.0 - 2024-09-18
+
+### Fixed
+
+- Mistakenly reports an invalid value if Spring placeholders (`${...}`) are used. -- Thanks to @jkumar-altir
+
 ## 242.1.0 - 2024-09-17
 
 ### Fixed

@@ -1,5 +1,4 @@
 import org.jetbrains.changelog.Changelog
-import org.jetbrains.changelog.date
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
@@ -17,7 +16,7 @@ java {
 }
 
 group = "dev.flikas"
-version = "242.1.0"
+version = "242.2.0"
 
 repositories {
     mavenCentral()
@@ -48,10 +47,6 @@ dependencies {
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito", "mockito-core", "2.12.0")
-}
-
-changelog {
-    header.set(provider { "[${version.get()}] - ${date()}" })
 }
 
 intellijPlatform {
