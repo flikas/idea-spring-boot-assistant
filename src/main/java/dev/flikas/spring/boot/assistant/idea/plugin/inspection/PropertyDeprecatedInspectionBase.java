@@ -1,77 +1,48 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.inspection;
 
-import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.progress.ProgressIndicatorProvider;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiElementVisitor;
-import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
-import dev.flikas.spring.boot.assistant.idea.plugin.misc.ServiceUtil;
-import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode;
-import in.oneton.idea.spring.assistant.plugin.suggestion.clazz.IterableKeySuggestionNode;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.MetadataPropertySuggestionNode;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataDeprecation;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataProperty;
-import in.oneton.idea.spring.assistant.plugin.suggestion.service.SuggestionService;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata.Property.Deprecation;
+import dev.flikas.spring.boot.assistant.idea.plugin.misc.PsiTypeUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.yaml.YAMLUtil;
+import org.jetbrains.yaml.psi.YAMLAlias;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
-import org.jetbrains.yaml.psi.YamlPsiElementVisitor;
+import org.jetbrains.yaml.psi.YAMLMapping;
+import org.jetbrains.yaml.psi.YAMLValue;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.truncateIdeaDummyIdentifier;
-import static java.util.Objects.requireNonNull;
-
-public abstract class PropertyDeprecatedInspectionBase extends LocalInspectionTool {
+public abstract class PropertyDeprecatedInspectionBase extends YamlInspectionBase {
   @Override
-  public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
-    SuggestionService service = ServiceUtil.getServiceFromEligibleFile(
-        holder.getFile(),
-        YamlPropertiesFileType.INSTANCE,
-        SuggestionService.class
-    );
-    if (service == null) {
-      return PsiElementVisitor.EMPTY_VISITOR;
+  protected void visitKeyValue(
+      @NotNull Module module, @NotNull YAMLKeyValue keyValue, @NotNull ProblemsHolder holder, boolean isOnTheFly
+  ) {
+    YAMLValue yamlValue = keyValue.getValue();
+    if (yamlValue == null) return;
+    if (yamlValue instanceof YAMLAlias) return; //TODO Support YAML alias.
+
+    String propertyName = YAMLUtil.getConfigFullName(keyValue);
+    ModuleMetadataService service = module.getService(ModuleMetadataService.class);
+    MetadataProperty property = service.getIndex().getProperty(propertyName);
+    if (property == null) return;
+
+    if (yamlValue instanceof YAMLMapping
+        && !property.getFullType().map(t -> PsiTypeUtils.isMap(module.getProject(), t)).orElse(false)) {
+      // Property exists, its value in YAML is a mapping, but the property's type is not a Map: this may happen on
+      // property deprecation, for example, "spring.profiles" & "spring.profiles.active/group/include/...".
+      // If it happens, we should only prompt deprecation while the actual value type coincides with the property's type.
+      return;
     }
-    Module module = ModuleUtil.findModuleForFile(holder.getFile());
-    assert module != null;
-    return new YamlPsiElementVisitor() {
-      @Override
-      public void visitKeyValue(@NotNull YAMLKeyValue keyValue) {
-        ProgressIndicatorProvider.checkCanceled();
-        if (keyValue.getValue() == null) return;
-        List<String> ancestralKeys = new ArrayList<>();
-        PsiElement context = keyValue;
-        do {
-          if (context instanceof YAMLKeyValue) {
-            ancestralKeys.add(0, truncateIdeaDummyIdentifier(((YAMLKeyValue) context).getKeyText()));
-          }
-          context = requireNonNull(context).getParent();
-        } while (context != null);
-        List<SuggestionNode> matchedNodesFromRootTillLeaf = service.findMatchedNodesRootTillEnd(ancestralKeys);
-        if (matchedNodesFromRootTillLeaf == null || matchedNodesFromRootTillLeaf.isEmpty()) {
-          return;
-        }
-        SuggestionNode node = matchedNodesFromRootTillLeaf.get(matchedNodesFromRootTillLeaf.size() - 1);
-        if (node instanceof IterableKeySuggestionNode) {
-          node = ((IterableKeySuggestionNode) node).getUnwrapped();
-        }
-        if (node instanceof MetadataPropertySuggestionNode) {
-          SpringConfigurationMetadataProperty property = ((MetadataPropertySuggestionNode) node).getProperty();
-          if (property == null) return;
-          SpringConfigurationMetadataDeprecation deprecation = property.getDeprecation();
-          if (deprecation != null) {
-            foundDeprecatedKey(keyValue, property, deprecation, holder, isOnTheFly);
-          }
-        }
-      }
-    };
+    Deprecation deprecation = property.getMetadata().getDeprecation();
+    if (deprecation != null) {
+      foundDeprecatedKey(keyValue, property, deprecation, holder, isOnTheFly);
+    }
   }
 
-  protected abstract void foundDeprecatedKey(YAMLKeyValue keyValue, SpringConfigurationMetadataProperty property,
-                                             SpringConfigurationMetadataDeprecation deprecation, ProblemsHolder holder,
-                                             boolean isOnTheFly);
+
+  protected abstract void foundDeprecatedKey(
+      YAMLKeyValue keyValue, MetadataProperty property, Deprecation deprecation,
+      ProblemsHolder holder, boolean isOnTheFly
+  );
 }

@@ -2,26 +2,35 @@ package dev.flikas.spring.boot.assistant.idea.plugin.metadata.index;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.*;
-import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.util.PsiTypesUtil;
+import com.intellij.psi.JavaPsiFacade;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiJavaParserFacade;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiType;
 import com.intellij.psi.util.PsiUtil;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyName;
-import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyTypeUtil;
-import lombok.*;
-import org.apache.commons.lang.StringUtils;
+import dev.flikas.spring.boot.assistant.idea.plugin.misc.PsiMethodUtils;
+import dev.flikas.spring.boot.assistant.idea.plugin.misc.PsiTypeUtils;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationPropertyName.Form.DASHED;
 
 
-public abstract class MetadataIndexBase implements MetadataIndex {
+abstract class MetadataIndexBase implements MetadataIndex {
   private static final Logger log = Logger.getInstance(MetadataIndexBase.class);
 
   protected final Map<PropertyName, Group> groups = new HashMap<>();
@@ -42,6 +51,12 @@ public abstract class MetadataIndexBase implements MetadataIndex {
 
 
   @Override
+  public @NotNull Project getProject() {
+    return project;
+  }
+
+
+  @Override
   @Nullable
   public MetadataGroup getGroup(String name) {
     PropertyName key = PropertyName.adapt(name);
@@ -49,8 +64,9 @@ public abstract class MetadataIndexBase implements MetadataIndex {
   }
 
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public Collection<MetadataGroup> getGroups() {
+  public @NotNull Collection<MetadataGroup> getGroups() {
     return (Collection) groups.values();
   }
 
@@ -73,8 +89,9 @@ public abstract class MetadataIndexBase implements MetadataIndex {
   }
 
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public Collection<MetadataProperty> getProperties() {
+  public @NotNull Collection<MetadataProperty> getProperties() {
     return (Collection) properties.values();
   }
 
@@ -86,8 +103,9 @@ public abstract class MetadataIndexBase implements MetadataIndex {
   }
 
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public Collection<MetadataHint> getHints() {
+  public @NotNull Collection<MetadataHint> getHints() {
     return (Collection) hints.values();
   }
 
@@ -112,6 +130,37 @@ public abstract class MetadataIndexBase implements MetadataIndex {
 
   protected void add(ConfigurationMetadata.Hint h) {
     this.hints.put(PropertyName.of(h.getName()), new Hint(h));
+  }
+
+
+  protected void add(String source, @NotNull ConfigurationMetadata metadata) {
+    if (metadata.isEmpty()) return;
+
+    if (metadata.getGroups() != null) {
+      metadata.getGroups().forEach(g -> {
+        try {
+          add(g);
+        } catch (Exception e) {
+          log.warn("Invalid group " + g.getName() + " in " + source + ", skipped", e);
+        }
+      });
+    }
+    if (metadata.getHints() != null) {
+      metadata.getHints().forEach(h -> {
+        try {
+          add(h);
+        } catch (Exception e) {
+          log.warn("Invalid hint " + h.getName() + " in " + source + ", skipped", e);
+        }
+      });
+    }
+    metadata.getProperties().forEach(p -> {
+      try {
+        add(p);
+      } catch (Exception e) {
+        log.warn("Invalid property " + p.getName() + " in " + source + ", skipped", e);
+      }
+    });
   }
 
 
@@ -147,89 +196,55 @@ public abstract class MetadataIndexBase implements MetadataIndex {
 
 
     @Override
-    @Nullable
-    public PsiClass getType() {
-      return this.propertyType != null ? PsiUtil.resolveClassInType(this.propertyType) : null;
+    public Optional<PsiClass> getType() {
+      return Optional.ofNullable(this.propertyType).map(PsiUtil::resolveClassInType);
     }
 
 
     @Override
-    @Nullable
-    public PsiClass getSourceType() {
-      String sourceType = metadata.getSourceType();
-      if (StringUtils.isBlank(sourceType)) return null;
-      return PropertyTypeUtil.findClass(project, sourceType);
+    public Optional<PsiClass> getSourceType() {
+      return Optional.ofNullable(metadata.getSourceType())
+          .filter(StringUtils::isNotBlank)
+          .map(type -> PsiTypeUtils.findClass(project, type));
     }
 
 
     @Override
-    public @Nullable PsiType getFullType() {
-      return this.propertyType;
+    public MetadataIndex getIndex() {
+      return MetadataIndexBase.this;
     }
 
 
     @Override
-    @Nullable
-    public PsiField getSourceField() {
-      PsiClass sourceType = getSourceType();
-      if (sourceType == null) return null;
-      return sourceType.findFieldByName(getCamelCaseLastName(), true);
+    public Optional<PsiType> getFullType() {
+      return Optional.ofNullable(this.propertyType);
     }
 
 
     @Override
-    @Nullable
-    public MetadataHint getHint() {
-      return hints.getOrDefault(propertyName, hints.get(propertyName.append("values")));
+    public Optional<PsiField> getSourceField() {
+      return getSourceType().map(type -> type.findFieldByName(getCamelCaseLastName(), true));
     }
 
 
     @Override
-    @Nullable
-    public MetadataHint getKeyHint() {
-      return hints.get(propertyName.append("keys"));
+    public Optional<MetadataHint> getHint() {
+      return Optional.ofNullable(hints.getOrDefault(propertyName, hints.get(propertyName.append("values"))));
+    }
+
+
+    @Override
+    public Optional<MetadataHint> getKeyHint() {
+      return Optional.ofNullable(hints.get(propertyName.append("keys")));
     }
 
 
     @Override
     public boolean canBind(@NotNull String key) {
       PropertyName keyName = PropertyName.adapt(key);
-      if (this.propertyName.equals(keyName)) return true;
-      if (this.propertyName.isAncestorOf(keyName)) {
-        @Nullable PsiType[] keyValueTypes = getKeyValueTypes();
-        if (keyValueTypes == null) return false;
-        PsiType keyType = keyValueTypes[0];
-        PsiType valueType = keyValueTypes[1];
-        if (PsiTypesUtil.classNameEquals(keyType, CommonClassNames.JAVA_LANG_STRING) && PropertyTypeUtil.isValueType(valueType)) {
-          // String key can be bound to any nested keys.
-          return true;
-        }
-        return this.propertyName.getNumberOfElements() == keyName.getNumberOfElements() + 1 && PropertyTypeUtil.isValueType(keyType);
-      }
-      return false;
-    }
-
-
-    /**
-     * @return the key and value types of this property if it is or can be converted to a java.util.Map, or null if not.
-     */
-    private @Nullable PsiType[] getKeyValueTypes() {
-      PsiType type = getFullType();
-      if (type == null) return null;
-      @NotNull PsiClassType mapType = PsiType.getTypeByName(CommonClassNames.JAVA_UTIL_MAP, project, GlobalSearchScope.allScope(project));
-      if (PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_MAP)
-          || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_HASH_MAP)
-          || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_CONCURRENT_HASH_MAP)
-          || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_LINKED_HASH_MAP)) {
-        return type instanceof PsiClassType classType ? classType.getParameters() : null;
-      } else if (PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_PROPERTIES)) {
-        // java.util.Properties implements Map<Object,Object>, we should manually force it to string.
-        PsiClassType stringType = PsiType.getJavaLangString(PsiManager.getInstance(project), GlobalSearchScope.allScope(project));
-        return new PsiType[]{stringType, stringType};
-      } else if (!mapType.isAssignableFrom(type)) {
-        log.warn("Cannot retrieve key & value types from map type: " + type);
-      }
-      return null;
+      return this.propertyName.equals(keyName)
+          // A Map property can bind all sub-key-values.
+          || this.propertyName.isAncestorOf(keyName) && PsiTypeUtils.isMap(project, getFullType().orElse(null));
     }
 
 
@@ -239,6 +254,7 @@ public abstract class MetadataIndexBase implements MetadataIndex {
   }
 
 
+  @SuppressWarnings("LombokGetterMayBeUsed")
   @RequiredArgsConstructor
   @EqualsAndHashCode(of = "metadata")
   @ToString(of = "metadata")
@@ -257,11 +273,10 @@ public abstract class MetadataIndexBase implements MetadataIndex {
      * @see ConfigurationMetadata.Group#getType()
      */
     @Override
-    @Nullable
-    public PsiClass getType() {
-      String type = metadata.getType();
-      if (StringUtils.isBlank(type)) return null;
-      return PropertyTypeUtil.findClass(project, type);
+    public Optional<PsiClass> getType() {
+      return Optional.ofNullable(metadata.getType())
+          .filter(StringUtils::isNotBlank)
+          .map(type -> PsiTypeUtils.findClass(project, type));
     }
 
 
@@ -269,11 +284,16 @@ public abstract class MetadataIndexBase implements MetadataIndex {
      * @see ConfigurationMetadata.Group#getSourceType()
      */
     @Override
-    @Nullable
-    public PsiClass getSourceType() {
-      String sourceType = metadata.getSourceType();
-      if (StringUtils.isBlank(sourceType)) return null;
-      return PropertyTypeUtil.findClass(project, sourceType);
+    public Optional<PsiClass> getSourceType() {
+      return Optional.ofNullable(metadata.getSourceType())
+          .filter(StringUtils::isNotBlank)
+          .map(type -> PsiTypeUtils.findClass(project, type));
+    }
+
+
+    @Override
+    public MetadataIndex getIndex() {
+      return MetadataIndexBase.this;
     }
 
 
@@ -281,14 +301,15 @@ public abstract class MetadataIndexBase implements MetadataIndex {
      * @see ConfigurationMetadata.Group#getSourceMethod()
      */
     @Override
-    @Nullable
-    public PsiMethod getSourceMethod() {
-      //TODO Implement this
-      return null;
+    public Optional<PsiMethod> getSourceMethod() {
+      String sourceMethod = metadata.getSourceMethod();
+      if (StringUtils.isBlank(sourceMethod)) return Optional.empty();
+      return getSourceType().flatMap(sourceClass -> PsiMethodUtils.findMethodBySignature(sourceClass, sourceMethod));
     }
   }
 
 
+  @SuppressWarnings("LombokGetterMayBeUsed")
   @RequiredArgsConstructor
   @EqualsAndHashCode(of = "metadata")
   @ToString(of = "metadata")

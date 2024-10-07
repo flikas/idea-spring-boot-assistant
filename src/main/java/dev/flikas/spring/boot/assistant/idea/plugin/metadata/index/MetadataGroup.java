@@ -2,10 +2,11 @@ package dev.flikas.spring.boot.assistant.idea.plugin.metadata.index;
 
 import com.intellij.psi.PsiMethod;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata.Group;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public interface MetadataGroup extends MetadataItem {
-  @Nullable PsiMethod getSourceMethod();
+  Optional<PsiMethod> getSourceMethod();
 
   Group getMetadata();
 }

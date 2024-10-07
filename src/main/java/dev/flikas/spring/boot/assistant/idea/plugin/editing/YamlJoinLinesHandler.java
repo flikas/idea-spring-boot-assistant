@@ -9,7 +9,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.codeStyle.CodeStyleManager;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
+import dev.flikas.spring.boot.assistant.idea.plugin.filetype.SpringBootConfigurationYamlFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.yaml.YAMLTokenTypes;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
@@ -42,7 +42,7 @@ public class YamlJoinLinesHandler implements JoinRawLinesHandlerDelegate {
     VirtualFile virtualFile = file.getVirtualFile();
     if (virtualFile == null) return CANNOT_JOIN;
     FileTypeManager ftm = FileTypeManager.getInstance();
-    if (!ftm.isFileOfType(virtualFile, YamlPropertiesFileType.INSTANCE)) return CANNOT_JOIN;
+    if (!ftm.isFileOfType(virtualFile, SpringBootConfigurationYamlFileType.INSTANCE)) return CANNOT_JOIN;
     // Take effects only when first line represents a key
     PsiElement elementAtStartLineEnd = file.findElementAt(start - 1);
     if (elementAtStartLineEnd == null || !YAMLTokenTypes.COLON.equals(elementAtStartLineEnd.getNode().getElementType()))

@@ -4,7 +4,7 @@ import com.intellij.codeInsight.completion.InsertHandler;
 import com.intellij.codeInsight.completion.InsertionContext;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.util.text.CharArrayUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 // a large section of this class is borrowed from https://github.com/zalando/intellij-swagger
 public class YamlValueInsertHandler implements InsertHandler<LookupElement> {

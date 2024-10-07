@@ -1,9 +1,13 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.navigation;
 
 import com.intellij.patterns.PsiElementPattern;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiReference;
+import com.intellij.psi.PsiReferenceContributor;
+import com.intellij.psi.PsiReferenceProvider;
+import com.intellij.psi.PsiReferenceRegistrar;
 import com.intellij.util.ProcessingContext;
-import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
+import dev.flikas.spring.boot.assistant.idea.plugin.filetype.SpringBootConfigurationYamlFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.yaml.YAMLLanguage;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
@@ -20,7 +24,7 @@ public class YamlReferenceContributor extends PsiReferenceContributor {
     PsiElementPattern.Capture<YAMLKeyValue> pattern =
         psiElement(YAMLKeyValue.class)
             .withLanguage(YAMLLanguage.INSTANCE)
-            .inVirtualFile(virtualFile().ofType(YamlPropertiesFileType.INSTANCE));
+            .inVirtualFile(virtualFile().ofType(SpringBootConfigurationYamlFileType.INSTANCE));
     registrar.registerReferenceProvider(pattern, new PsiReferenceProvider() {
       @Override
       public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element,

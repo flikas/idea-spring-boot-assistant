@@ -9,17 +9,22 @@ plugins {
     id("org.jetbrains.intellij.platform")
     id("org.jetbrains.changelog")
     id("io.freefair.lombok")
-    id("org.springframework.boot")
+//    id("org.springframework.boot")
 }
-apply(plugin = "io.spring.dependency-management")
+//apply(plugin = "io.spring.dependency-management")
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+        vendor = JvmVendorSpec.JETBRAINS
+    }
 }
 
 idea {
     module {
         isDownloadJavadoc = true
+        isDownloadSources = true
     }
 }
 
@@ -36,7 +41,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity("2024.2")
+        intellijIdeaCommunity("2024.2.3")
         bundledPlugin("com.intellij.java")
         bundledPlugin("com.intellij.properties")
         bundledPlugin("org.jetbrains.plugins.yaml")
@@ -49,10 +54,12 @@ dependencies {
         zipSigner()
     }
 
+    implementation("jakarta.validation:jakarta.validation-api:3.1.0")
     implementation("org.apache.commons", "commons-collections4", "4.4")
     implementation("org.apache.commons", "commons-lang3", "3.14.0")
+    implementation("org.springframework.boot", "spring-boot", "3.3.4")
     implementation("com.miguelfonseca.completely", "completely-core", "0.9.0")
-    implementation("org.springframework.boot", "spring-boot")
+//    implementation("org.springframework.boot", "spring-boot")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.mockito", "mockito-core", "2.12.0")
@@ -76,6 +83,7 @@ intellijPlatform {
         }
     }
 }
+
 
 tasks {
     wrapper {

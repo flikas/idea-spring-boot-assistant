@@ -14,7 +14,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.impl.light.LightElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.DocumentUtil;
-import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
+import dev.flikas.spring.boot.assistant.idea.plugin.filetype.SpringBootConfigurationYamlFileType;
 import in.oneton.idea.spring.assistant.plugin.suggestion.Suggestion;
 import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode;
 import in.oneton.idea.spring.assistant.plugin.suggestion.service.SuggestionService;
@@ -67,7 +67,8 @@ public class YamlDocumentationProvider extends AbstractDocumentationProvider {
   @Override
   public PsiElement getCustomDocumentationElement(@NotNull Editor editor, @NotNull PsiFile file,
       @Nullable PsiElement element) {
-    if (file.getVirtualFile() == null || !(file.getVirtualFile().getFileType() instanceof YamlPropertiesFileType)) {
+    if (file.getVirtualFile() == null || !(file.getVirtualFile()
+                                               .getFileType() instanceof SpringBootConfigurationYamlFileType)) {
       return super.getCustomDocumentationElement(editor, file, element);
     }
     if (element == null) {

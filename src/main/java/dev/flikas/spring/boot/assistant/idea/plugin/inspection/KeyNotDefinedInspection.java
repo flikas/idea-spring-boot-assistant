@@ -1,56 +1,37 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.inspection;
 
-import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.progress.ProgressIndicatorProvider;
-import com.intellij.psi.PsiElementVisitor;
-import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService;
-import dev.flikas.spring.boot.assistant.idea.plugin.misc.ServiceUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.yaml.YAMLBundle;
 import org.jetbrains.yaml.YAMLUtil;
 import org.jetbrains.yaml.psi.YAMLCompoundValue;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
-import org.jetbrains.yaml.psi.YamlPsiElementVisitor;
 
-public class KeyNotDefinedInspection extends LocalInspectionTool {
+public class KeyNotDefinedInspection extends YamlInspectionBase {
   @Override
-  public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
-    ModuleMetadataService service = ServiceUtil.getServiceFromEligibleFile(
-        holder.getFile(),
-        YamlPropertiesFileType.INSTANCE,
-        ModuleMetadataService.class
-    );
-    if (service == null) {
-      return PsiElementVisitor.EMPTY_VISITOR;
+  protected void visitKeyValue(
+      @NotNull Module module, @NotNull YAMLKeyValue keyValue, @NotNull ProblemsHolder holder, boolean isOnTheFly
+  ) {
+    if (keyValue.getKey() == null) return;
+    if (keyValue.getValue() instanceof YAMLCompoundValue) return; //only validate leaf nodes
+
+    ModuleMetadataService service = module.getService(ModuleMetadataService.class);
+    String fullName = YAMLUtil.getConfigFullName(keyValue);
+    MetadataProperty property = service.getIndex().getProperty(fullName);
+    if (property != null) {
+      // Property is defined
+      return;
     }
-    Module module = ModuleUtil.findModuleForFile(holder.getFile());
-    assert module != null;
-    return new YamlPsiElementVisitor() {
-      @Override
-      public void visitKeyValue(@NotNull YAMLKeyValue keyValue) {
-        ProgressIndicatorProvider.checkCanceled();
-        if (keyValue.getKey() == null) return;
-        if (keyValue.getValue() instanceof YAMLCompoundValue) return;
-        String fullName = YAMLUtil.getConfigFullName(keyValue);
-        MetadataProperty property = service.getIndex().getProperty(fullName);
-        if (property != null) {
-          // Property is defined
-          return;
-        }
-        // Property is not defined, but maybe its parent has a Map<String,String> or Properties type.
-        property = service.getIndex().getNearestParentProperty(fullName);
-        if (property == null || !property.canBind(fullName)) {
-          holder.registerProblem(
-              keyValue.getKey(),
-              YAMLBundle.message("YamlUnknownKeysInspectionBase.unknown.key", keyValue.getKeyText())
-          );
-        }
-      }
-    };
+    // Property is not defined, but maybe its parent has a Map<String,String> or Properties type.
+    property = service.getIndex().getNearestParentProperty(fullName);
+    if (property == null || !property.canBind(fullName)) {
+      holder.registerProblem(
+          keyValue.getKey(),
+          YAMLBundle.message("YamlUnknownKeysInspectionBase.unknown.key", keyValue.getKeyText())
+      );
+    }
   }
 }

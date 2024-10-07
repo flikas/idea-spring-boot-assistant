@@ -7,22 +7,34 @@ import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiField;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiManager;
 import com.intellij.psi.search.FileTypeIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
+import dev.flikas.spring.boot.assistant.idea.plugin.filetype.SpringBootConfigurationYamlFileType;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataGroup;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.yaml.YAMLUtil;
-import org.jetbrains.yaml.psi.*;
+import org.jetbrains.yaml.psi.YAMLFile;
+import org.jetbrains.yaml.psi.YAMLKeyValue;
+import org.jetbrains.yaml.psi.YAMLMapping;
+import org.jetbrains.yaml.psi.YAMLSequence;
+import org.jetbrains.yaml.psi.YAMLValue;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-@Service
+@Service(Service.Level.PROJECT)
 public final class PsiToYamlKeyReferenceService {
   private final Project project;
   /**
@@ -49,7 +61,8 @@ public final class PsiToYamlKeyReferenceService {
 
   private synchronized void reindex() {
     Map<String, Set<YamlKeyToNullReference>> index = new HashMap<>();
-    Collection<VirtualFile> files = FileTypeIndex.getFiles(YamlPropertiesFileType.INSTANCE, GlobalSearchScope.projectScope(project));
+    Collection<VirtualFile> files = FileTypeIndex.getFiles(
+        SpringBootConfigurationYamlFileType.INSTANCE, GlobalSearchScope.projectScope(project));
     PsiManager psiManager = PsiManager.getInstance(project);
     for (VirtualFile file : files) {
       if (!file.isValid()) continue;
@@ -66,29 +79,29 @@ public final class PsiToYamlKeyReferenceService {
   }
 
 
-  private void indexYamlKey(Map<String, Set<YamlKeyToNullReference>> index, ModuleMetadataService metadataService, YAMLKeyValue kv) {
+  private void indexYamlKey(
+      Map<String, Set<YamlKeyToNullReference>> index, ModuleMetadataService metadataService, YAMLKeyValue kv
+  ) {
     ProgressManager.checkCanceled();
     if (kv.getKey() == null) return;
     String fullName = YAMLUtil.getConfigFullName(kv);
     // find if any property matches this key
     MetadataProperty property = metadataService.getIndex().getProperty(fullName);
     if (property != null) {
-      PsiField sourceField = property.getSourceField();
-      if (sourceField != null) {
-        // It is wierd but ReferencesSearch uses the 'source element' not the 'target element' of the returned PsiReference.
-        // So here we create a YamlKey2NullReference whose source is the target YamlKey.
-        index.computeIfAbsent(getCanonicalName(sourceField), key -> new ConcurrentSkipListSet<>())
+      // It is wierd but ReferencesSearch uses the 'source element' not the 'target element' of the returned PsiReference.
+      // So here we create a YamlKeyToNullReference whose source is the target YamlKey.
+      property.getSourceField().ifPresent(field -> {
+        index.computeIfAbsent(getCanonicalName(field), key -> new ConcurrentSkipListSet<>())
             .add(new YamlKeyToNullReference(kv));
-      }
+      });
     }
     // find if any group matches this key
     MetadataGroup group = metadataService.getIndex().getGroup(fullName);
     if (group != null) {
-      PsiClass type = group.getType();
-      if (type != null) {
+      group.getType().ifPresent(type -> {
         index.computeIfAbsent(getCanonicalName(type), key -> new ConcurrentSkipListSet<>())
             .add(new YamlKeyToNullReference(kv));
-      }
+      });
     }
     //recursive into sub-keys
     @Nullable YAMLValue val = kv.getValue();

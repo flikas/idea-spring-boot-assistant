@@ -1,15 +1,13 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.service;
 
-import com.intellij.ProjectTopics;
 import com.intellij.openapi.application.ReadAction;
-import com.intellij.openapi.components.Service;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootEvent;
 import com.intellij.openapi.roots.ModuleRootListener;
 import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.vfs.VirtualFile;
-import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.FileMetadataIndex;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.AggregatedMetadataIndex;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,8 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service
-class ModuleMetadataServiceImpl implements ModuleMetadataService {
+final class ModuleMetadataServiceImpl implements ModuleMetadataService {
   private final Module module;
   private MetadataIndex index = MetadataIndex.EMPTY;
   private Set<String> classRootsUrlSnapshot = new HashSet<>();
@@ -28,8 +25,8 @@ class ModuleMetadataServiceImpl implements ModuleMetadataService {
   public ModuleMetadataServiceImpl(Module module) {
     this.module = module;
     // add change listener
-    // TODO WorkspaceModuleChangeListener is better, but it is in experimental for now.
-    module.getProject().getMessageBus().connect().subscribe(ProjectTopics.PROJECT_ROOTS, new ModuleRootListener() {
+    // TODO WorkspaceModel.eventLog is better, but it is in experimental for now.
+    module.getProject().getMessageBus().connect().subscribe(ModuleRootListener.TOPIC, new ModuleRootListener() {
       @Override
       public void rootsChanged(@NotNull ModuleRootEvent event) {
         ReadAction.run(ModuleMetadataServiceImpl.this::refreshMetadata);
@@ -55,9 +52,9 @@ class ModuleMetadataServiceImpl implements ModuleMetadataService {
     }
     Project project = this.module.getProject();
     ProjectMetadataService pms = project.getService(ProjectMetadataService.class);
-    FileMetadataIndex meta = new FileMetadataIndex(project);
+    AggregatedMetadataIndex meta = new AggregatedMetadataIndex();
     for (VirtualFile root : roots) {
-      meta.merge(pms.getMetadata(root));
+      meta.addLast(pms.getMetadata(root));
     }
     if (!meta.isEmpty()) {
       this.index = meta;

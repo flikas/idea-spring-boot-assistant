@@ -15,7 +15,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.impl.source.codeStyle.IndentHelperImpl;
 import com.intellij.psi.util.PsiTreeUtil;
-import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
+import dev.flikas.spring.boot.assistant.idea.plugin.filetype.SpringBootConfigurationYamlFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.yaml.YAMLTextUtil;
 import org.jetbrains.yaml.YAMLTokenTypes;
@@ -34,7 +34,7 @@ public class YamlSplitKeyProcessor extends EnterHandlerDelegateAdapter {
         VirtualFile virtualFile = file.getVirtualFile();
         if (virtualFile == null) return Continue;
         FileTypeManager ftm = FileTypeManager.getInstance();
-        if (!ftm.isFileOfType(virtualFile, YamlPropertiesFileType.INSTANCE))
+      if (!ftm.isFileOfType(virtualFile, SpringBootConfigurationYamlFileType.INSTANCE))
             return Continue;
         if (caretOffset.get() <= 0)
             return Continue;

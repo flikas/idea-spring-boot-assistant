@@ -15,16 +15,16 @@ import java.util.Map;
  */
 @Data
 public class ConfigurationMetadata {
-  /*
+  /**
    * The "groups" are higher level items that do not themselves specify a value but instead provide a contextual grouping for properties.
    */
   @Nullable
   private List<Group> groups;
-  /*
+  /**
    * Each "property" is a configuration item that the user specifies with a given value.
    */
   private List<Property> properties = new ArrayList<>();
-  /*
+  /**
    * "hints" are additional information used to assist the user in configuring a given property.
    */
   @Nullable

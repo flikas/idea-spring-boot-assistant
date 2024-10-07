@@ -2,7 +2,6 @@ package dev.flikas.spring.boot.assistant.idea.plugin.navigation;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiReferenceBase;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
@@ -19,14 +18,11 @@ public class YamlKeyToPsiReference extends PsiReferenceBase<PsiElement> {
   private final YAMLKeyValue yamlKeyValue;
   @Nullable
   private final Module module;
-  @NotNull
-  private final Project project;
 
 
   public YamlKeyToPsiReference(@NotNull YAMLKeyValue yamlKeyValue) {
     super(yamlKeyValue, true);
     this.yamlKeyValue = yamlKeyValue;
-    this.project = yamlKeyValue.getProject();
     this.module = ModuleUtil.findModuleForPsiElement(yamlKeyValue);
   }
 
@@ -44,9 +40,9 @@ public class YamlKeyToPsiReference extends PsiReferenceBase<PsiElement> {
     MetadataItem propertyOrGroup = metadata.getPropertyOrGroup(fullName);
     if (propertyOrGroup == null) return null;
     if (propertyOrGroup instanceof MetadataProperty property) {
-      return property.getSourceField();
+      return property.getSourceField().orElse(null);
     } else {
-      return propertyOrGroup.getType();
+      return propertyOrGroup.getType().orElse(null);
     }
   }
 }

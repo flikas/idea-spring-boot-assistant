@@ -1,10 +1,11 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.inspection;
 
 import com.intellij.codeInspection.ProblemsHolder;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataDeprecation;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataDeprecationLevel;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataProperty;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
+
+import static dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata.Property.Deprecation.Level.ERROR;
 
 /**
  * Report deprecated properties whose deprecation level is error, which means that the property is completely unsupported.
@@ -13,10 +14,12 @@ import org.jetbrains.yaml.psi.YAMLKeyValue;
  */
 public class PropertyRemovedInspection extends PropertyDeprecatedInspectionBase {
   @Override
-  protected void foundDeprecatedKey(YAMLKeyValue keyValue, SpringConfigurationMetadataProperty property,
-                                    SpringConfigurationMetadataDeprecation deprecation, ProblemsHolder holder,
-                                    boolean isOnTheFly) {
-    if (deprecation.getLevel() == SpringConfigurationMetadataDeprecationLevel.error) {
+  protected void foundDeprecatedKey(
+      YAMLKeyValue keyValue, MetadataProperty property,
+      ConfigurationMetadata.Property.Deprecation deprecation, ProblemsHolder holder,
+      boolean isOnTheFly
+  ) {
+    if (deprecation.getLevel() == ERROR) {
       assert keyValue.getKey() != null;
       holder.registerProblem(
           keyValue.getKey(),

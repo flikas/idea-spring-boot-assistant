@@ -1,135 +1,181 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.inspection;
 
-import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.progress.ProgressIndicatorProvider;
-import com.intellij.psi.*;
-import dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType;
-import dev.flikas.spring.boot.assistant.idea.plugin.misc.ServiceUtil;
-import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNode;
-import in.oneton.idea.spring.assistant.plugin.suggestion.SuggestionNodeType;
-import in.oneton.idea.spring.assistant.plugin.suggestion.clazz.GenericClassMemberWrapper;
-import in.oneton.idea.spring.assistant.plugin.suggestion.clazz.IterableKeySuggestionNode;
-import in.oneton.idea.spring.assistant.plugin.suggestion.clazz.MetadataProxy;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.MetadataPropertySuggestionNode;
-import in.oneton.idea.spring.assistant.plugin.suggestion.metadata.json.SpringConfigurationMetadataProperty;
-import in.oneton.idea.spring.assistant.plugin.suggestion.service.SuggestionService;
-import java.util.regex.Pattern;
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiType;
+import com.intellij.psi.util.PsiUtilCore;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService;
+import dev.flikas.spring.boot.assistant.idea.plugin.misc.PsiTypeUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.yaml.YAMLUtil;
+import org.jetbrains.yaml.psi.YAMLAlias;
+import org.jetbrains.yaml.psi.YAMLCompoundValue;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
+import org.jetbrains.yaml.psi.YAMLMapping;
+import org.jetbrains.yaml.psi.YAMLScalar;
+import org.jetbrains.yaml.psi.YAMLSequence;
+import org.jetbrains.yaml.psi.YAMLSequenceItem;
+import org.jetbrains.yaml.psi.YAMLValue;
 import org.jetbrains.yaml.psi.YamlPsiElementVisitor;
+import org.springframework.boot.convert.ApplicationConversionService;
+import org.springframework.core.convert.ConversionException;
+import org.springframework.core.convert.ConversionService;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
-import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.truncateIdeaDummyIdentifier;
-import static java.util.Objects.requireNonNull;
-
-public class InvalidValueInspection extends LocalInspectionTool {
+public class InvalidValueInspection extends YamlInspectionBase {
+  private static final Logger log = Logger.getInstance(InvalidValueInspection.class);
   private static final Pattern SPRING_BOOT_PLACEHOLDER_EXPRESSION = Pattern.compile("\\$\\{.+}");
   private static final Pattern SPRING_BOOT_PLACEHOLDER_ONLY_EXPRESSION = Pattern.compile("\\$\\{[^:]+}");
+  private static final ConversionService springConversionService = new ApplicationConversionService();
+
 
   @Override
-  public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly) {
-    SuggestionService service = ServiceUtil.getServiceFromEligibleFile(
-        holder.getFile(),
-        YamlPropertiesFileType.INSTANCE,
-        SuggestionService.class
-    );
-    if (service == null) {
-      return PsiElementVisitor.EMPTY_VISITOR;
+  protected void visitKeyValue(
+      @NotNull Module module, @NotNull YAMLKeyValue keyValue, @NotNull ProblemsHolder holder, boolean isOnTheFly
+  ) {
+    YAMLValue yamlValue = keyValue.getValue();
+    if (yamlValue == null) return;
+    if (yamlValue instanceof YAMLAlias) return; //TODO Support alias.
+    ModuleMetadataService service = module.getService(ModuleMetadataService.class);
+
+    String propertyName = YAMLUtil.getConfigFullName(keyValue);
+    MetadataProperty property = service.getIndex().getProperty(propertyName);
+    if (property == null) {
+      // It is not a leaf node, or there should be a KeyNotDefined problem. In any case, we do not have to report any problems here.
+      return;
     }
-    Module module = ModuleUtil.findModuleForFile(holder.getFile());
-    assert module != null;
-    return new YamlPsiElementVisitor() {
-      @Override
-      public void visitKeyValue(@NotNull YAMLKeyValue keyValue) {
-        ProgressIndicatorProvider.checkCanceled();
-        if (keyValue.getValue() == null) return;
-        List<String> ancestralKeys = new ArrayList<>();
-        PsiElement context = keyValue;
-        do {
-          if (context instanceof YAMLKeyValue) {
-            ancestralKeys.add(0, truncateIdeaDummyIdentifier(((YAMLKeyValue) context).getKeyText()));
-          }
-          context = requireNonNull(context).getParent();
-        } while (context != null);
-        List<SuggestionNode> matchedNodesFromRootTillLeaf = service.findMatchedNodesRootTillEnd(ancestralKeys);
-        if (matchedNodesFromRootTillLeaf == null || matchedNodesFromRootTillLeaf.isEmpty()) {
+    Optional<String> valueType = property.getType().map(PsiClass::getQualifiedName);
+    if (valueType.isEmpty()) return;
+
+    Project project = yamlValue.getProject();
+    PsiType type = property.getFullType().orElseThrow();
+    switch (yamlValue) {
+      case YAMLScalar scalar -> {
+        // A YAML scalar can map to a scalar value or a list of one element.
+        PsiType elementType;
+        if (PsiTypeUtils.isCollection(project, type)) {
+          elementType = PsiTypeUtils.getElementType(project, type);
+        } else if (PsiTypeUtils.isValueType(type)) {
+          elementType = type;
+        } else {
+          holder.registerProblem(
+              yamlValue,
+              "Property '" + propertyName + "' has an invalid value, here should be a yaml mapping of type '"
+                  + type.getPresentableText() + "'");
           return;
         }
-        SuggestionNode node = matchedNodesFromRootTillLeaf.get(matchedNodesFromRootTillLeaf.size() - 1);
-        SuggestionNodeType suggestionNodeType = node.getSuggestionNodeType(module);
-        if (!suggestionNodeType.representsLeaf()) return;
-        PsiType valueType;
-        if (node instanceof IterableKeySuggestionNode) {
-          node = ((IterableKeySuggestionNode) node).getUnwrapped();
+        assert elementType != null;
+        validateValue(scalar, elementType.getCanonicalText(), holder);
+      }
+      case YAMLSequence sequenceValue -> {
+        if (!PsiTypeUtils.isCollection(project, type)) {
+          holder.registerProblem(
+              yamlValue,
+              "Property '" + propertyName + "' has an invalid value, here should be a value of type '"
+                  + type.getPresentableText() + "'");
+          return;
         }
-        if (node instanceof MetadataPropertySuggestionNode) {
-          SpringConfigurationMetadataProperty property = ((MetadataPropertySuggestionNode) node).getProperty();
-          if (property == null) return;
-          MetadataProxy delegate = property.getDelegate(module);
-          if (delegate == null) return;
-          valueType = delegate.getPsiType(module);
-
-        } else if (node instanceof GenericClassMemberWrapper) {
-          valueType = ((GenericClassMemberWrapper) node).getMemberReferredClassMetadataProxy(module)
-                                                        .getPsiType(module);
-        } else {
-          valueType = null;
+        PsiType elementType = PsiTypeUtils.getElementType(project, type);
+        assert elementType != null;
+        if (!PsiTypeUtils.isValueType(elementType)) {
+          // There should be a more specific call to validate its children.
+          // TODO Support List<List<...>>
+          return;
         }
-        if (valueType == null) return;
-        PsiPrimitiveType primitiveValueType = valueType.accept(new PsiTypeVisitor<>() {
-          @Override
-          public PsiPrimitiveType visitPrimitiveType(@NotNull PsiPrimitiveType primitiveType) {
-            return primitiveType;
+        for (YAMLSequenceItem item : sequenceValue.getItems()) {
+          @Nullable YAMLValue value = item.getValue();
+          if (value instanceof YAMLScalar scalar) {
+            validateValue(scalar, elementType.getCanonicalText(), holder);
+          } else if (value instanceof YAMLCompoundValue) {
+            holder.registerProblem(
+                value,
+                "Property '" + propertyName + "' has an invalid value, here should be a yaml scalar of type '"
+                    + elementType.getPresentableText() + "'");
           }
-
+          //TODO Support YAMLAlias.
+        }
+      }
+      case YAMLMapping mappingValue -> {
+        if (!PsiTypeUtils.isMap(project, type)) {
+          // Property exists, its value in YAML is a mapping, but the property's type is not a Map: this may happen on
+          // property deprecation, for example, "spring.profiles" & "spring.profiles.active/group/include/...".
+          // If it happens, we should only validate values while the actual value type coincides with the property's type.
+          return;
+        }
+        PsiType[] kvType = PsiTypeUtils.getKeyValueType(project, type);
+        assert kvType != null && kvType.length == 2;
+        // Key is not a value type: Unsupported.
+        boolean canValidateKey = PsiTypeUtils.isValueType(kvType[0]);
+        // Value is not a value type: There should be a more specific call to validate its children.
+        boolean canValidateValue = PsiTypeUtils.isValueType(kvType[1]);
+        mappingValue.acceptChildren(new YamlPsiElementVisitor() {
           @Override
-          public PsiPrimitiveType visitType(@NotNull PsiType type) {
-            return PsiPrimitiveType.getUnboxedType(type);
+          public void visitKeyValue(@NotNull YAMLKeyValue kv) {
+            @Nullable YAMLValue value = kv.getValue();
+            if (value instanceof YAMLScalar scalar) {
+              if (canValidateKey) {
+                String keyText = YAMLUtil.getConfigFullName(kv).substring(propertyName.length() + 1);
+                validateValue(kv.getKey(), keyText, kvType[0].getCanonicalText(), holder);
+              }
+              if (canValidateValue) {
+                validateValue(scalar, kvType[1].getCanonicalText(), holder);
+              }
+            } else {
+              super.visitKeyValue(kv);
+            }
           }
         });
-        if (primitiveValueType == null) return;
+      }
+      default -> log.warn("Unsupported yaml node type: " + PsiUtilCore.getElementType(yamlValue));
+    }
+  }
 
-        String propertyValue = keyValue.getValueText();
 
-        if (isValueSpringBootPlaceholderExpression(propertyValue)) {
-          if (isValueSpringBootPlaceholderOnlyExpression(propertyValue)) {
-            return;
-          }
+  private void validateValue(YAMLScalar yamlValue, String valueTypeClass, ProblemsHolder holder) {
+    validateValue(yamlValue, yamlValue.getTextValue(), valueTypeClass, holder);
+  }
 
-          int startIndex = propertyValue.indexOf(':') + 1;
-          int endIndex = propertyValue.lastIndexOf('}');
-          propertyValue = propertyValue.substring(startIndex, endIndex);
-        }
 
-        try {
-          Class<?> valueClass = Class.forName(primitiveValueType.getBoxedTypeName());
-          Constructor<?> constructor = valueClass.getConstructor(String.class);
-          constructor.newInstance(propertyValue);
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException e) {
-          throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-          assert keyValue.getValue() != null;
-          holder.registerProblem(
-              keyValue.getValue(),
-              "Value \"" + keyValue.getValueText() + "\" cannot be converted to: " + primitiveValueType.getName()
-          );
-        }
+  private void validateValue(
+      PsiElement propertyElement, String propertyValue, String valueTypeClass, ProblemsHolder holder
+  ) {
+    if (isValueSpringBootPlaceholderExpression(propertyValue)) {
+      if (isValueSpringBootPlaceholderOnlyExpression(propertyValue)) {
+        return;
       }
 
-      private boolean isValueSpringBootPlaceholderExpression(String value) {
-        return SPRING_BOOT_PLACEHOLDER_EXPRESSION.matcher(value).matches();
-      }
+      int startIndex = propertyValue.indexOf(':') + 1;
+      int endIndex = propertyValue.lastIndexOf('}');
+      propertyValue = propertyValue.substring(startIndex, endIndex);
+    }
 
-      private boolean isValueSpringBootPlaceholderOnlyExpression(String value) {
-        return SPRING_BOOT_PLACEHOLDER_ONLY_EXPRESSION.matcher(value).matches();
-      }
-    };
+    try {
+      Class<?> valueClass = Class.forName(valueTypeClass);
+      springConversionService.convert(propertyValue, valueClass);
+    } catch (ClassNotFoundException e) {
+      log.warn(InvalidValueInspection.class.getSimpleName() + ":: Cannot load value class " + valueTypeClass, e);
+    } catch (ConversionException e) {
+      holder.registerProblem(
+          propertyElement,
+          "Value \"" + propertyValue + "\" cannot be converted to: " + valueTypeClass);
+    }
+  }
+
+
+  private boolean isValueSpringBootPlaceholderExpression(String value) {
+    return SPRING_BOOT_PLACEHOLDER_EXPRESSION.matcher(value).matches();
+  }
+
+
+  private boolean isValueSpringBootPlaceholderOnlyExpression(String value) {
+    return SPRING_BOOT_PLACEHOLDER_ONLY_EXPRESSION.matcher(value).matches();
   }
 }

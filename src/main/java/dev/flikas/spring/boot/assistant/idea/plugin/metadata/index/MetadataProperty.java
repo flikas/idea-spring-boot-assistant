@@ -4,7 +4,8 @@ import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiType;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 /**
  * A spring configuration metadata property
@@ -15,22 +16,22 @@ public interface MetadataProperty extends MetadataItem {
    *
    * @see ConfigurationMetadata.Property#getType()
    */
-  @Nullable PsiType getFullType();
+  Optional<PsiType> getFullType();
 
   /**
    * @return the field that this property will be bound to, null if not present.
    */
-  @Nullable PsiField getSourceField();
+  Optional<PsiField> getSourceField();
 
   /**
    * get hint or value hint for this property.
    */
-  @Nullable MetadataHint getHint();
+  Optional<MetadataHint> getHint();
 
   /**
    * get key hint for this property if it is a Map.
    */
-  @Nullable MetadataHint getKeyHint();
+  Optional<MetadataHint> getKeyHint();
 
   /**
    * @return whether the specified key can be bound to this property.

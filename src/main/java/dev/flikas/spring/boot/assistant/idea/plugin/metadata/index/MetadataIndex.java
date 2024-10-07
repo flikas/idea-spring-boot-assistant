@@ -1,5 +1,7 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.index;
 
+import com.intellij.openapi.project.Project;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -15,13 +17,19 @@ public interface MetadataIndex {
 
 
     @Override
+    public @NotNull Project getProject() {
+      return null;
+    }
+
+
+    @Override
     public @Nullable MetadataGroup getGroup(String name) {
       return null;
     }
 
 
     @Override
-    public Collection<MetadataGroup> getGroups() {
+    public @NotNull Collection<MetadataGroup> getGroups() {
       return Collections.emptyList();
     }
 
@@ -39,7 +47,7 @@ public interface MetadataIndex {
 
 
     @Override
-    public Collection<MetadataProperty> getProperties() {
+    public @NotNull Collection<MetadataProperty> getProperties() {
       return Collections.emptyList();
     }
 
@@ -51,7 +59,7 @@ public interface MetadataIndex {
 
 
     @Override
-    public Collection<MetadataHint> getHints() {
+    public @NotNull Collection<MetadataHint> getHints() {
       return Collections.emptyList();
     }
 
@@ -65,23 +73,21 @@ public interface MetadataIndex {
 
   boolean isEmpty();
 
+  @NotNull Project getProject();
+
+  @NotNull Collection<MetadataGroup> getGroups();
+
+  @NotNull Collection<MetadataProperty> getProperties();
+
+  @NotNull Collection<MetadataHint> getHints();
+
   @Nullable MetadataGroup getGroup(String name);
 
-  Collection<MetadataGroup> getGroups();
+  @Nullable MetadataProperty getProperty(String name);
 
-  @Nullable
-  MetadataProperty getProperty(String name);
+  @Nullable MetadataProperty getNearestParentProperty(String name);
 
-  @Nullable
-  MetadataProperty getNearestParentProperty(String name);
+  @Nullable MetadataHint getHint(String name);
 
-  Collection<MetadataProperty> getProperties();
-
-  @Nullable
-  MetadataHint getHint(String name);
-
-  Collection<MetadataHint> getHints();
-
-  @Nullable
-  MetadataItem getPropertyOrGroup(String name);
+  @Nullable MetadataItem getPropertyOrGroup(String name);
 }

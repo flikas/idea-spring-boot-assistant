@@ -1,7 +1,7 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.source;
 
 import net.jcip.annotations.Immutable;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Locale;
 import java.util.Set;
@@ -30,7 +30,7 @@ public class PropertyName extends ConfigurationPropertyName {
    * @see ConfigurationPropertyName#of(CharSequence)
    */
   public static PropertyName of(String propertyName) {
-    return new PropertyName(elementsOf(propertyName, false));
+    return new PropertyName(elementsOf(propertyName.trim(), false));
   }
 
 
@@ -38,7 +38,7 @@ public class PropertyName extends ConfigurationPropertyName {
    * @see ConfigurationPropertyName#ofIfValid(CharSequence)
    */
   public static PropertyName ofIfValid(String propertyName) {
-    Elements elements = elementsOf(propertyName, true);
+    Elements elements = elementsOf(propertyName.trim(), true);
     return elements != null ? new PropertyName(elements) : null;
   }
 
@@ -52,7 +52,7 @@ public class PropertyName extends ConfigurationPropertyName {
    * @see ConfigurationPropertyName#adapt(CharSequence, char, Function)
    */
   public static PropertyName adapt(String propertyName) {
-    return new PropertyName(adapt(propertyName, '.').elements);
+    return new PropertyName(adapt(propertyName.trim(), '.').elements);
   }
 
 
@@ -116,7 +116,7 @@ public class PropertyName extends ConfigurationPropertyName {
    */
   @Override
   public PropertyName append(String suffix) {
-    if (!StringUtils.hasLength(suffix)) {
+    if (StringUtils.isBlank(suffix)) {
       return this;
     } else {
       Elements additionalElements = probablySingleElementOf(suffix);
@@ -161,9 +161,9 @@ public class PropertyName extends ConfigurationPropertyName {
   protected int compare(String e1, ElementType type1, String e2, ElementType type2) {
     if (e1 != null && e2 != null
         && (e1.equals("*") && !e2.equals("#")
-        || e2.equals("*") && !e1.equals("#")
-        || e1.equals("#") && type2 == NUMERICALLY_INDEXED
-        || e2.equals("#") && type1 == NUMERICALLY_INDEXED)) {
+                || e2.equals("*") && !e1.equals("#")
+                || e1.equals("#") && type2 == NUMERICALLY_INDEXED
+                || e2.equals("#") && type1 == NUMERICALLY_INDEXED)) {
       return 0;
     }
     return super.compare(e1, type1, e2, type2);

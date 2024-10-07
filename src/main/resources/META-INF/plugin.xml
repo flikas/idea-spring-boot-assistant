@@ -80,92 +80,94 @@
        "implementation" class specifies the name of the class
        added to the extension point. -->
   <extensions defaultExtensionNs="com.intellij">
-      <postStartupActivity
-              implementation="in.oneton.idea.spring.assistant.plugin.suggestion.component.BootstrapImpl"/>
-      <completion.contributor language="yaml"
-                              implementationClass="in.oneton.idea.spring.assistant.plugin.suggestion.completion.YamlCompletionContributor"/>
-      <fileType name="spring-boot-properties-yaml"
-                implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.filetype.YamlPropertiesFileType"
-                fieldName="INSTANCE"
-                fileNames="application.yml;application.yaml"
-                patterns="application-*.yaml;application-*.yml;bootstrap.yml;bootstrap-*.yml;bootstrap.yaml;bootstrap-*.yaml"/>
-      <psi.referenceContributor
-              implementation="dev.flikas.spring.boot.assistant.idea.plugin.navigation.YamlReferenceContributor"/>
-      <referencesSearch
-              implementation="dev.flikas.spring.boot.assistant.idea.plugin.navigation.PsiToYamlKeySearcher"/>
-      <!--<completion.contributor language="Properties"-->
-      <!--implementationClass="in.oneton.idea.spring.assistant.plugin.suggestion.completion.PropertiesCompletionContributor"/>-->
+    <postStartupActivity
+        implementation="in.oneton.idea.spring.assistant.plugin.suggestion.component.BootstrapImpl"/>
+    <completion.contributor language="yaml"
+                            implementationClass="in.oneton.idea.spring.assistant.plugin.suggestion.completion.YamlCompletionContributor"/>
+    <fileType name="spring-boot-properties-yaml"
+              implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.filetype.SpringBootConfigurationYamlFileType"
+              fieldName="INSTANCE"
+              fileNames="application.yml;application.yaml"
+              patterns="application-*.yaml;application-*.yml;bootstrap.yml;bootstrap-*.yml;bootstrap.yaml;bootstrap-*.yaml"/>
+    <psi.referenceContributor
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.navigation.YamlReferenceContributor"/>
+    <referencesSearch
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.navigation.PsiToYamlKeySearcher"/>
+    <!--<completion.contributor language="Properties"-->
+    <!--implementationClass="in.oneton.idea.spring.assistant.plugin.suggestion.completion.PropertiesCompletionContributor"/>-->
 
-      <documentationProvider
-              implementation="in.oneton.idea.spring.assistant.plugin.suggestion.completion.YamlDocumentationProvider"/>
+    <platform.backend.documentation.psiTargetProvider
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.documentation.YamlDocumentationTargetProvider"/>
+    <!--      <documentationProvider
+                  implementation="in.oneton.idea.spring.assistant.plugin.suggestion.completion.YamlDocumentationProvider"/>-->
 
-      <!--<documentationProvider-->
-      <!--implementation="in.oneton.idea.spring.assistant.plugin.suggestion.completion.PropertiesDocumentationProvider"/>-->
+    <!--<documentationProvider-->
+    <!--implementation="in.oneton.idea.spring.assistant.plugin.suggestion.completion.PropertiesDocumentationProvider"/>-->
 
-      <!--<annotator-->
-      <!--implementationClass="DuplicateKeyAnnotator"-->
-      <!--language="yaml"/>-->
-      <!--<annotator-->
-      <!--implementationClass="DataTypeCheckerAnnotator"-->
-      <!--language="yaml"/>-->
-      <!--<annotator-->
-      <!--implementationClass="PropertyNotInModelAnnotator"-->
-      <!--language="yaml"/>-->
+    <!--<annotator-->
+    <!--implementationClass="DuplicateKeyAnnotator"-->
+    <!--language="yaml"/>-->
+    <!--<annotator-->
+    <!--implementationClass="DataTypeCheckerAnnotator"-->
+    <!--language="yaml"/>-->
+    <!--<annotator-->
+    <!--implementationClass="PropertyNotInModelAnnotator"-->
+    <!--language="yaml"/>-->
 
-      <projectService
-              serviceInterface="in.oneton.idea.spring.assistant.plugin.suggestion.service.ProjectSuggestionService"
-              serviceImplementation="in.oneton.idea.spring.assistant.plugin.suggestion.service.ProjectSuggestionServiceImpl"/>
-      <moduleService
-              serviceInterface="in.oneton.idea.spring.assistant.plugin.suggestion.service.SuggestionService"
-              serviceImplementation="in.oneton.idea.spring.assistant.plugin.suggestion.service.SuggestionServiceImpl"/>
-      <moduleService
-              serviceInterface="dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService"
-              serviceImplementation="dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataServiceImpl"/>
+    <projectService
+        serviceInterface="in.oneton.idea.spring.assistant.plugin.suggestion.service.ProjectSuggestionService"
+        serviceImplementation="in.oneton.idea.spring.assistant.plugin.suggestion.service.ProjectSuggestionServiceImpl"/>
+    <moduleService
+        serviceInterface="in.oneton.idea.spring.assistant.plugin.suggestion.service.SuggestionService"
+        serviceImplementation="in.oneton.idea.spring.assistant.plugin.suggestion.service.SuggestionServiceImpl"/>
+    <moduleService
+        serviceInterface="dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService"
+        serviceImplementation="dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataServiceImpl"/>
 
-      <errorHandler implementation="dev.flikas.spring.boot.assistant.idea.plugin.report.GitHubReporter"/>
+    <errorHandler implementation="dev.flikas.spring.boot.assistant.idea.plugin.report.GitHubReporter"/>
 
-      <joinLinesHandler implementation="dev.flikas.spring.boot.assistant.idea.plugin.editing.YamlJoinLinesHandler"/>
-      <enterHandlerDelegate
-              implementation="dev.flikas.spring.boot.assistant.idea.plugin.editing.YamlSplitKeyProcessor"/>
+    <joinLinesHandler implementation="dev.flikas.spring.boot.assistant.idea.plugin.editing.YamlJoinLinesHandler"/>
+    <enterHandlerDelegate
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.editing.YamlSplitKeyProcessor"/>
 
-      <localInspection
-              language="yaml"
-              groupPath="Spring Boot"
-              groupName="Configuration"
-              displayName="Undefined key"
-              enabledByDefault="true"
-              level="WARNING"
-              editorAttributes="WRONG_REFERENCES_ATTRIBUTES"
-              suppressId="undefined"
-              implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.KeyNotDefinedInspection"
-      />
-      <localInspection
-              language="yaml"
-              groupPath="Spring Boot"
-              groupName="Configuration"
-              displayName="Invalid value"
-              enabledByDefault="true"
-              level="WARNING"
-              suppressId="invalidValue"
-              implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.InvalidValueInspection"/>
-      <localInspection
-              language="yaml"
-              groupPath="Spring Boot"
-              groupName="Configuration"
-              displayName="Property removed"
-              enabledByDefault="true"
-              level="WARNING"
-              editorAttributes="MARKED_FOR_REMOVAL_ATTRIBUTES"
-              implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.PropertyRemovedInspection"/>
-      <localInspection
-              language="yaml"
-              groupPath="Spring Boot"
-              groupName="Configuration"
-              displayName="Property deprecated"
-              enabledByDefault="true"
-              level="WARNING"
-              editorAttributes="DEPRECATED_ATTRIBUTES"
-              implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.PropertyDeprecatedInspection"/>
+    <localInspection
+        language="yaml"
+        groupPath="Spring boot"
+        groupName="Configuration"
+        displayName="Undefined key"
+        enabledByDefault="true"
+        level="WARNING"
+        editorAttributes="WRONG_REFERENCES_ATTRIBUTES"
+        suppressId="undefined"
+        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.KeyNotDefinedInspection"
+    />
+    <localInspection
+        language="yaml"
+        groupPath="Spring boot"
+        groupName="Configuration"
+        displayName="Invalid value"
+        enabledByDefault="true"
+        level="WARNING"
+        suppressId="invalidValue"
+        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.InvalidValueInspection"/>
+    <localInspection
+        language="yaml"
+        groupPath="Spring boot"
+        groupName="Configuration"
+        displayName="Property removed"
+        enabledByDefault="true"
+        level="WARNING"
+        editorAttributes="MARKED_FOR_REMOVAL_ATTRIBUTES"
+        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.PropertyRemovedInspection"/>
+    <localInspection
+        language="yaml"
+        groupPath="Spring boot"
+        groupName="Configuration"
+        displayName="Property deprecated"
+        enabledByDefault="true"
+        level="WARNING"
+        editorAttributes="DEPRECATED_ATTRIBUTES"
+        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.PropertyDeprecatedInspection"/>
   </extensions>
 
 </idea-plugin>

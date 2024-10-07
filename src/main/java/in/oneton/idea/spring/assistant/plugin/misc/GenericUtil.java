@@ -14,14 +14,22 @@ import org.jetbrains.yaml.YAMLLanguage;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
 
 import java.text.BreakIterator;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.intellij.codeInsight.completion.CompletionUtilCore.DUMMY_IDENTIFIER_TRIMMED;
 import static com.intellij.codeInsight.documentation.DocumentationManagerUtil.createHyperlink;
-import static com.intellij.openapi.util.text.StringUtil.*;
+import static com.intellij.openapi.util.text.StringUtil.containsChar;
+import static com.intellij.openapi.util.text.StringUtil.endsWithChar;
+import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
+import static com.intellij.openapi.util.text.StringUtil.replace;
 import static java.text.BreakIterator.getSentenceInstance;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -38,10 +46,12 @@ public class GenericUtil {
 
   private static final Pattern methodToFragmentConverter = Pattern.compile("(.+)\\.(.+)\\(.*\\)");
 
+
   public static String typeForDocumentationNavigation(String type) {
 
     return type.replaceAll("\\$", ".");
   }
+
 
   public static String shortenFrequentJavaType(CharSequence type) {
     JvmPrimitiveTypeKind ptk = JvmPrimitiveTypeKind.getKindByFqn(type.toString());
@@ -54,6 +64,7 @@ public class GenericUtil {
     return type.toString();
   }
 
+
   public static CharSequence trimJavaPackage(CharSequence type, CharSequence packageName) {
     String prefix = packageName + ".";
     if (type.toString().startsWith(prefix)
@@ -62,6 +73,7 @@ public class GenericUtil {
     }
     return type;
   }
+
 
   /**
    * @return length of rendered class name.
@@ -107,10 +119,12 @@ public class GenericUtil {
     return len;
   }
 
+
   public static String methodForDocumentationNavigation(String typeAndMethod) {
     return methodToFragmentConverter.matcher(typeForDocumentationNavigation(typeAndMethod))
-                                    .replaceAll("$1#$2");
+        .replaceAll("$1#$2");
   }
+
 
   @NotNull
   public static String getCodeStyleIntent(InsertionContext insertionContext) {
@@ -122,6 +136,7 @@ public class GenericUtil {
         "\t" :
         StringUtil.repeatSymbol(' ', indentOptions.INDENT_SIZE);
   }
+
 
   @NotNull
   public static String getFirstSentenceWithoutDot(String fullSentence) {
@@ -141,41 +156,55 @@ public class GenericUtil {
     }
   }
 
-  public static String moduleNamesAsStrCommaDelimited(List<Module> newModules,
-      boolean includeProjectName) {
+
+  public static String moduleNamesAsStrCommaDelimited(
+      List<Module> newModules,
+      boolean includeProjectName
+  ) {
     return moduleNamesAsStrCommaDelimited(newModules.stream(), includeProjectName);
   }
 
-  public static String moduleNamesAsStrCommaDelimited(Module[] newModules,
-      boolean includeProjectName) {
+
+  public static String moduleNamesAsStrCommaDelimited(
+      Module[] newModules,
+      boolean includeProjectName
+  ) {
     return moduleNamesAsStrCommaDelimited(stream(newModules), includeProjectName);
   }
 
-  private static String moduleNamesAsStrCommaDelimited(Stream<Module> moduleStream,
-      boolean includeProjectName) {
+
+  private static String moduleNamesAsStrCommaDelimited(
+      Stream<Module> moduleStream,
+      boolean includeProjectName
+  ) {
     return moduleStream.map(module -> includeProjectName ?
         module.getProject().getName() + ":" + module.getName() :
         module.getName()).collect(joining(", "));
   }
 
+
   public static String truncateIdeaDummyIdentifier(@NotNull PsiElement element) {
     return truncateIdeaDummyIdentifier(element.getText());
   }
 
+
   public static String truncateIdeaDummyIdentifier(String text) {
     return text.replace(DUMMY_IDENTIFIER_TRIMMED, "");
   }
+
 
   @SafeVarargs
   public static <T> List<T> modifiableList(T... items) {
     return new ArrayList<>(asList(items));
   }
 
+
   public static <T> List<T> newListWithMembers(List<T> itemsToCopy, T newItem) {
     ArrayList<T> newModifiableList = new ArrayList<>(itemsToCopy);
     newModifiableList.add(newItem);
     return newModifiableList;
   }
+
 
   public static String removeGenerics(String type) {
     Matcher matcher = GENERIC_SECTION_REMOVAL_PATTERN.matcher(type);
@@ -184,6 +213,7 @@ public class GenericUtil {
     }
     return type;
   }
+
 
   public static String shortenedType(String type) {
     if (type == null) {
@@ -196,8 +226,10 @@ public class GenericUtil {
     return type;
   }
 
+
   public static String dotDelimitedOriginalNames(
-      List<? extends SuggestionNode> matchesTopFirstTillParentNode, SuggestionNode currentNode) {
+      List<? extends SuggestionNode> matchesTopFirstTillParentNode, SuggestionNode currentNode
+  ) {
     StringBuilder builder = new StringBuilder();
 
     for (SuggestionNode aMatchesTopFirstTillParentNode : matchesTopFirstTillParentNode) {
@@ -214,12 +246,16 @@ public class GenericUtil {
     return builder.toString();
   }
 
+
   public static String dotDelimitedOriginalNames(List<? extends SuggestionNode> matches) {
     return dotDelimitedOriginalNames(matches, 0);
   }
 
-  public static String dotDelimitedOriginalNames(List<? extends SuggestionNode> matches,
-      int startIndex) {
+
+  public static String dotDelimitedOriginalNames(
+      List<? extends SuggestionNode> matches,
+      int startIndex
+  ) {
     StringBuilder builder = new StringBuilder();
 
     for (int i = startIndex; i < matches.size(); i++) {
@@ -235,6 +271,7 @@ public class GenericUtil {
     return builder.toString();
   }
 
+
   @NotNull
   public static String getIndent(String indent, int numOfHops) {
     if (numOfHops == 0) {
@@ -247,11 +284,15 @@ public class GenericUtil {
     return builder.toString();
   }
 
+
   @NotNull
-  public static String getOverallIndent(String existingIndentation, String indentPerLevel,
-      int numOfLevels) {
+  public static String getOverallIndent(
+      String existingIndentation, String indentPerLevel,
+      int numOfLevels
+  ) {
     return existingIndentation + getIndent(indentPerLevel, numOfLevels);
   }
+
 
   @NotNull
   public static <T extends Comparable<T>> SortedSet<T> newSingleElementSortedSet(T t) {

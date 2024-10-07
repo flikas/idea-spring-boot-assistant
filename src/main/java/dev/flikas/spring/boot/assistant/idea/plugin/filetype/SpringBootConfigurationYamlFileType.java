@@ -9,27 +9,32 @@ import org.jetbrains.yaml.YAMLLanguage;
 
 import javax.swing.*;
 
-public class YamlPropertiesFileType extends LanguageFileType {
-  public static final YamlPropertiesFileType INSTANCE = new YamlPropertiesFileType();
+public class SpringBootConfigurationYamlFileType extends LanguageFileType {
+  public static final SpringBootConfigurationYamlFileType INSTANCE = new SpringBootConfigurationYamlFileType();
 
-  private YamlPropertiesFileType() {
+
+  private SpringBootConfigurationYamlFileType() {
     super(YAMLLanguage.INSTANCE, true);
   }
+
 
   @Override
   public @NonNls @NotNull String getName() {
     return "spring-boot-properties-yaml";
   }
 
+
   @Override
   public @NotNull String getDescription() {
-    return "Spring yaml properties file";
+    return "Spring configuration yaml file";
   }
+
 
   @Override
   public @NotNull String getDefaultExtension() {
     return "yaml";
   }
+
 
   @Override
   public @Nullable Icon getIcon() {
