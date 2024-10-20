@@ -1,5 +1,6 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.index;
 
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.JavaPsiFacade;
@@ -8,7 +9,6 @@ import com.intellij.psi.PsiField;
 import com.intellij.psi.PsiJavaParserFacade;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiType;
-import com.intellij.psi.util.PsiUtil;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyName;
 import dev.flikas.spring.boot.assistant.idea.plugin.misc.PsiMethodUtils;
@@ -183,7 +183,10 @@ abstract class MetadataIndexBase implements MetadataIndex {
         PsiJavaParserFacade parser = JavaPsiFacade.getInstance(project).getParserFacade();
         // When reference an inner class, we should use A.B not A$B but spring does.
         String typeString = metadata.getType().replace('$', '.');
-        this.propertyType = parser.createTypeFromText(typeString, null);
+        this.propertyType = ReadAction.compute(() -> {
+          PsiType t = parser.createTypeFromText(typeString, null);
+          return PsiTypeUtils.isPhysical(t) ? t : null;
+        });
       }
     }
 
@@ -197,7 +200,7 @@ abstract class MetadataIndexBase implements MetadataIndex {
 
     @Override
     public Optional<PsiClass> getType() {
-      return Optional.ofNullable(this.propertyType).map(PsiUtil::resolveClassInType);
+      return Optional.ofNullable(this.propertyType).map(PsiTypeUtils::resolveClassInType);
     }
 
 
@@ -217,7 +220,7 @@ abstract class MetadataIndexBase implements MetadataIndex {
 
     @Override
     public Optional<PsiType> getFullType() {
-      return Optional.ofNullable(this.propertyType);
+      return Optional.ofNullable(this.propertyType).filter(t -> ReadAction.compute(t::isValid));
     }
 
 

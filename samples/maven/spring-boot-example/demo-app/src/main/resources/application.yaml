@@ -1,0 +1,160 @@
+# Inspection::KeyNotDefined(negative)
+an-undefined-key: 1
+resilience4j:
+  circuitbreaker:
+    instances:
+      "backendA":
+        # Inspection::KeyNotDefined(negative, Map<String, POJO>)
+        undefined: null
+        # Inspection::KeyNotDefined(positive, Map<String, POJO>)
+        allowHealthIndicatorToFail: false
+server:
+  servlet:
+    encoding:
+      "mapping":
+        # Inspection::KeyNotDefined(positive, Map<Non-String-Key, Non-String-Value>), Inspection::InvalidValue(positive)
+        "zh-CN": "UTF-8"
+        # Inspection::InvalidValue(negative)
+        "en-US": "ASCII1"
+  jetty:
+    # Inspection::InvalidValue(negative)
+    connection-idle-timeout: abcd
+    accesslog:
+      # Inspection::InvalidValue(positive), Inspection::KeyNotDefined(positive, List<String>)
+      ignore-paths:
+        - p1
+        - p2
+        - p3
+  # Inspection::Deprecated_Unsupported(negative)
+  use-forward-headers: true
+  tomcat:
+    # Inspection::InvalidValue(positive)
+    accept-count: 1
+    # Inspection::InvalidValue(positive)
+    connection-timeout: 3m
+    threads:
+      # Inspection::InvalidValue(positive)
+      max: ${spring.cloud-version}
+    accesslog:
+      # Inspection::InvalidValue(positive)
+      buffered: false
+
+spring:
+  # Inspection::KeyNotDefined(negative)
+  undefined: 2
+  # Inspection::Deprecated(positive)
+  profiles:
+    # Inspection::KeyNotDefined(positive), Inspection::InvalidValue(positive)
+    active: dev
+    # Inspection::InvalidValue(positive)
+    include:
+      - test
+      # Inspection::InvalidValue(negative), Inspection::KeyNotDefined(negative)
+      - invalid-key: invalid-value
+  datasource:
+    hikari:
+      data-source-properties:
+        # Inspection::KeyNotDefined(positive), Inspection::InvalidValue(positive)
+        any-property: should-be-valid
+  jpa:
+    hibernate:
+      naming:
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+    properties:
+      hibernate:
+        archive:
+          # Inspection::KeyNotDefined(positive), Inspection::InvalidValue(positive)
+          scanner: org.hibernate.boot.archive.scan.internal.StandardScanner
+  application:
+    index: 2
+    # Inspection::InvalidValue(negative)
+    name:
+      - name1
+      - name2
+  cloud:
+    loadbalancer:
+      clients:
+        a:
+          healthCheck:
+            initialDelay: 90
+    circuitbreaker:
+      resilience4j:
+        enabled: true
+    discovery:
+      client:
+        simple.instances:
+          a:
+            - port: 1
+              host: 127.0.0.1
+            - host: 127.0.0.1
+              serviceId: service
+              port: 12
+          b:
+            - host: 127.0.0.1
+              port: 12
+          c:
+            - host: 123
+              # Inspection::KeyNotDefined(negative, Map<String, List<POJO>>)
+              undefined: xxy
+  activemq:
+    packages:
+      trust-all: false
+  artemis:
+    embedded:
+      data-directory:
+
+
+logging:
+  pattern:
+    # Inspection::Deprecated(negative)
+    rolling-file-name: "xx"
+  group:
+    abb:
+      - xx
+      - yy
+    zzcs:
+      - ab
+  charset:
+    console: utf-8
+  # Inspection::InvalidValue(negative)
+  level: xyzdef
+  logback:
+    rollingpolicy:
+      # Inspection::InvalidValue(negative)
+      max-file-size: 100M
+---
+spring:
+  # Inspection::Deprecated(negative)
+  profiles:
+    - abcdef
+
+
+---
+example:
+  server:
+    address:
+    port: 8080
+    value1: 123
+my:
+  keys1:
+    - foo
+    - bar
+  jobs:
+    key:
+      name12: 12
+    aab:
+      cron: xxf
+      undefined: xx
+  client:
+    - client1
+    - "client2"
+  longString: |
+    abcidosie
+    sjigoes
+    jsdfiwoeige
+  longString2: >-
+    jsaidfoei
+    sdjfoiwe
+    sjfoeiwreow
+      
+

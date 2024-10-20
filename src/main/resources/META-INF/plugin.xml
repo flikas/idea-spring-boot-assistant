@@ -1,5 +1,5 @@
 <!-- `url` specifies the URL of the plugin homepage (can be opened from "Plugins" settings dialog) -->
-<idea-plugin url="https://github.com/flikas/intellij-spring-assistant">
+<idea-plugin url="https://github.com/flikas/idea-spring-boot-assistant">
 
   <!-- Plugin name. It should be short and descriptive and in Title Case.
        Displayed in the "Plugins" settings dialog and the plugin repository Web interface. -->
@@ -70,6 +70,12 @@
   <idea-version since-build="212" until-build="212.*"/>
   -->
 
+  <projectListeners>
+    <listener
+        class="dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataWatcher"
+        topic="com.intellij.platform.backend.workspace.WorkspaceModelChangeListener"/>
+  </projectListeners>
+
   <!-- Extensions which the plugin adds to extension points
        defined by the IntelliJ Platform or by other plugins.
        The "defaultExtensionNs" attribute must be set to the
@@ -80,8 +86,12 @@
        "implementation" class specifies the name of the class
        added to the extension point. -->
   <extensions defaultExtensionNs="com.intellij">
+    <!--suppress PluginXmlValidity -->
     <postStartupActivity
         implementation="in.oneton.idea.spring.assistant.plugin.suggestion.component.BootstrapImpl"/>
+    <!--suppress PluginXmlValidity -->
+    <postStartupActivity
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.metadata.Bootstrapper"/>
     <completion.contributor language="yaml"
                             implementationClass="in.oneton.idea.spring.assistant.plugin.suggestion.completion.YamlCompletionContributor"/>
     <fileType name="spring-boot-properties-yaml"

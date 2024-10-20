@@ -1,6 +1,7 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.index;
 
 import com.intellij.openapi.project.Project;
+import dev.flikas.spring.boot.assistant.idea.plugin.misc.MutableReference;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -8,9 +9,11 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AggregatedMetadataIndex implements MetadataIndex {
-  private final Deque<MetadataIndex> indexes = new ConcurrentLinkedDeque<>();
+  private final Deque<MutableReference<? extends MetadataIndex>> indexes = new ConcurrentLinkedDeque<>();
 
 
   public AggregatedMetadataIndex() {
@@ -24,25 +27,35 @@ public class AggregatedMetadataIndex implements MetadataIndex {
   }
 
 
-  public void addLast(MetadataIndex index) {
-    this.indexes.addLast(index);
+  public void addFirst(MetadataIndex index) {
+    this.indexes.addFirst(MutableReference.immutable(index));
   }
 
 
-  public void addFirst(MetadataIndex index) {
+  public void addFirst(MutableReference<? extends MetadataIndex> index) {
     this.indexes.addFirst(index);
+  }
+
+
+  public void addLast(MetadataIndex index) {
+    this.indexes.addLast(MutableReference.immutable(index));
+  }
+
+
+  public void addLast(MutableReference<? extends MetadataIndex> index) {
+    this.indexes.addLast(index);
   }
 
 
   @Override
   public boolean isEmpty() {
-    return indexes.stream().allMatch(MetadataIndex::isEmpty);
+    return getIndexStream().allMatch(MetadataIndex::isEmpty);
   }
 
 
   @Override
   public @NotNull Project getProject() {
-    return this.indexes.stream().map(MetadataIndex::getProject).reduce((p1, p2) -> {
+    return getIndexStream().map(MetadataIndex::getProject).reduce((p1, p2) -> {
       if (p1 == p2) {
         return p1;
       } else {
@@ -53,20 +66,26 @@ public class AggregatedMetadataIndex implements MetadataIndex {
 
 
   @Override
+  public @NotNull String getSource() {
+    return getIndexStream().map(MetadataIndex::getSource).collect(Collectors.joining(",", "Aggregated{", "}"));
+  }
+
+
+  @Override
   public @Nullable MetadataGroup getGroup(String name) {
-    return this.indexes.stream().map(index -> index.getGroup(name)).filter(Objects::nonNull).findFirst().orElse(null);
+    return getIndexStream().map(index -> index.getGroup(name)).filter(Objects::nonNull).findFirst().orElse(null);
   }
 
 
   @Override
   public @NotNull Collection<MetadataGroup> getGroups() {
-    return this.indexes.stream().flatMap(index -> index.getGroups().stream()).toList();
+    return getIndexStream().flatMap(index -> index.getGroups().stream()).toList();
   }
 
 
   @Override
   public MetadataProperty getProperty(String name) {
-    return this.indexes.stream()
+    return getIndexStream()
         .map(index -> index.getProperty(name))
         .filter(Objects::nonNull)
         .findFirst().orElse(null);
@@ -75,7 +94,7 @@ public class AggregatedMetadataIndex implements MetadataIndex {
 
   @Override
   public MetadataProperty getNearestParentProperty(String name) {
-    return this.indexes.stream()
+    return getIndexStream()
         .map(index -> index.getNearestParentProperty(name))
         .filter(Objects::nonNull)
         .findFirst().orElse(null);
@@ -84,13 +103,13 @@ public class AggregatedMetadataIndex implements MetadataIndex {
 
   @Override
   public @NotNull Collection<MetadataProperty> getProperties() {
-    return this.indexes.stream().flatMap(index -> index.getProperties().stream()).toList();
+    return getIndexStream().flatMap(index -> index.getProperties().stream()).toList();
   }
 
 
   @Override
   public MetadataHint getHint(String name) {
-    return this.indexes.stream()
+    return getIndexStream()
         .map(index -> index.getHint(name))
         .filter(Objects::nonNull)
         .findFirst().orElse(null);
@@ -99,15 +118,22 @@ public class AggregatedMetadataIndex implements MetadataIndex {
 
   @Override
   public @NotNull Collection<MetadataHint> getHints() {
-    return this.indexes.stream().flatMap(index -> index.getHints().stream()).toList();
+    return getIndexStream().flatMap(index -> index.getHints().stream()).toList();
   }
 
 
   @Override
   public MetadataItem getPropertyOrGroup(String name) {
-    return this.indexes.stream()
+    return getIndexStream()
         .map(index -> index.getPropertyOrGroup(name))
         .filter(Objects::nonNull)
         .findFirst().orElse(null);
+  }
+
+
+  private @NotNull Stream<? extends MetadataIndex> getIndexStream() {
+    return indexes.stream()
+        .map(MutableReference::dereference)
+        .filter(Objects::nonNull);
   }
 }

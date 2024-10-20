@@ -10,8 +10,7 @@ import org.jetbrains.annotations.NotNull;
  */
 @SuppressWarnings("LombokGetterMayBeUsed")
 public class ConfigurationMetadataIndex extends MetadataIndexBase {
-  @Getter
-  private final String source;
+  @Getter private final String source;
 
 
   public ConfigurationMetadataIndex(

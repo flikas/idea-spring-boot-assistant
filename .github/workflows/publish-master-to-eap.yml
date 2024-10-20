@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up JDK 21
+      - name: Set up JDK 21 # This jdk is just for running Gradle, the compiler will be downloaded according to Gradle's build script.
         uses: actions/setup-java@v2
         with:
           java-version: '21'
@@ -31,7 +31,7 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew buildPlugin
 
-# FIXME: Do not verify plugin for known problem: https://youtrack.jetbrains.com/issue/MP-6708
+      # FIXME: Do not verify plugin for known problem: https://youtrack.jetbrains.com/issue/MP-6708
       #      - name: Run Plugin Verifier
       #        run: ./gradlew verifyPlugin
       # The USERNAME and TOKEN need to correspond to the credentials environment variables used in

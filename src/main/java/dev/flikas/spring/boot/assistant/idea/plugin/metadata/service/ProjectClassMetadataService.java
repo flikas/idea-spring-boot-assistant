@@ -3,6 +3,7 @@ package dev.flikas.spring.boot.assistant.idea.plugin.metadata.service;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiExpression;
@@ -13,7 +14,6 @@ import com.intellij.psi.PsiPrimitiveType;
 import com.intellij.psi.PsiTreeChangeAdapter;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.util.PropertyUtil;
-import com.intellij.psi.util.PsiUtil;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.AggregatedMetadataIndex;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.ConfigurationMetadataIndex;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
@@ -24,9 +24,8 @@ import dev.flikas.spring.boot.assistant.idea.plugin.misc.PsiTypeUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
+import static dev.flikas.spring.boot.assistant.idea.plugin.misc.PsiTypeUtils.getCanonicalTextOfType;
 import static java.util.function.Predicate.not;
 
 /**
@@ -37,10 +36,9 @@ import static java.util.function.Predicate.not;
 @NotNull
 @Service(Service.Level.PROJECT)
 final class ProjectClassMetadataService implements Disposable {
-  private static final Logger log = Logger.getInstance(ProjectClassMetadataService.class);
+  private static final Logger LOG = Logger.getInstance(ProjectClassMetadataService.class);
 
   private final Project project;
-  private final ConcurrentMap<String, MetadataIndex> classMetadataCache = new ConcurrentHashMap<>();
 
 
   public ProjectClassMetadataService(Project project) {
@@ -57,14 +55,22 @@ final class ProjectClassMetadataService implements Disposable {
     if (PsiTypeUtils.isValueType(type)) {
       return Optional.empty();
     }
-    log.warn("[GENERATE]Generating metadata for: " + baseName + ", " + type.getCanonicalText());
-    return Optional.of(generateMetadata(new AggregatedMetadataIndex(), PropertyName.of(baseName), type))
+    return Optional.of(generateMetadataInSmartMode(new AggregatedMetadataIndex(), PropertyName.of(baseName), type))
         .filter(not(MetadataIndex::isEmpty));
   }
 
 
   @NotNull
+  private MetadataIndex generateMetadataInSmartMode(
+      AggregatedMetadataIndex index, PropertyName basename, PsiType type
+  ) {
+    return DumbService.getInstance(project).runReadActionInSmartMode(() -> generateMetadata(index, basename, type));
+  }
+
+
+  @NotNull
   private MetadataIndex generateMetadata(AggregatedMetadataIndex index, PropertyName basename, PsiType type) {
+    LOG.debug("Generating metadata for: " + basename + " -> " + type.getPresentableText());
     if (PsiTypeUtils.isValueType(type)) {
       // Exit condition: value type do not need to index.
       return index;
@@ -74,12 +80,12 @@ final class ProjectClassMetadataService implements Disposable {
         PsiType[] kvType = PsiTypeUtils.getKeyValueType(project, type);
         assert kvType != null && kvType.length == 2;
         if (!PsiTypeUtils.isValueType(kvType[0])) {
-          log.warn(basename + " has unsupported Map key type: " + type);
+          LOG.warn(basename + " has unsupported Map key type: " + type);
           return index;
         }
         generateMetadata(index, basename.appendAnyMapKey(), kvType[1]);
       } catch (Exception e) {
-        log.warn(basename + " has illegal Map type: " + type);
+        LOG.warn(basename + " has illegal Map type: " + type);
         return index;
       }
     } else if (PsiTypeUtils.isCollection(project, type)) {
@@ -88,14 +94,15 @@ final class ProjectClassMetadataService implements Disposable {
         assert elementType != null;
         generateMetadata(index, basename.appendAnyNumericalIndex(), elementType);
       } catch (Exception e) {
-        log.warn(basename + " has illegal Collection type: " + type);
+        LOG.warn(basename + " has illegal Collection type: " + type);
         return index;
       }
     } else {
-      PsiClass valueClass = PsiUtil.resolveClassInType(type);
+      PsiClass valueClass = PsiTypeUtils.resolveClassInType(type);
       if (valueClass == null) return index;
       ConfigurationMetadata metadata = new ConfigurationMetadata();
-      for (String fieldName : PropertyUtil.getWritableProperties(valueClass, true)) {
+      String[] writableProperties = PropertyUtil.getWritableProperties(valueClass, true);
+      for (String fieldName : writableProperties) {
         PsiField field = valueClass.findFieldByName(fieldName, true);
         if (field == null) continue;
         PropertyName name = basename.append(PropertyName.toKebabCase(fieldName));
@@ -108,7 +115,7 @@ final class ProjectClassMetadataService implements Disposable {
         if (propertyType == null) continue;
         if (PsiTypeUtils.isValueType(propertyType)) {
           // Leaf property, whose value can be converted to/from a single string
-          meta.setType(propertyType.getCanonicalText());
+          meta.setType(getCanonicalTextOfType(propertyType));
           meta.setSourceType(valueClass.getQualifiedName());
           PsiExpression initializer = field.getInitializer();
           if (initializer instanceof PsiLiteralExpression literal) {
@@ -120,7 +127,7 @@ final class ProjectClassMetadataService implements Disposable {
           generateMetadata(index, name, propertyType);
         }
       }
-      index.addLast(new ConfigurationMetadataIndex(project, type.getCanonicalText(), metadata));
+      index.addLast(new ConfigurationMetadataIndex(project, getCanonicalTextOfType(type), metadata));
     }
     return index;
   }

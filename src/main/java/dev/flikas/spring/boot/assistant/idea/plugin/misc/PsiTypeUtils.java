@@ -1,5 +1,6 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.misc;
 
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.CommonClassNames;
@@ -15,6 +16,7 @@ import com.intellij.psi.PsiType;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.ProjectScope;
 import com.intellij.psi.util.PsiTypesUtil;
+import com.intellij.psi.util.PsiUtil;
 import com.intellij.psi.util.TypeConversionUtil;
 import jakarta.validation.constraints.Size;
 import lombok.experimental.UtilityClass;
@@ -47,45 +49,58 @@ public class PsiTypeUtils {
   }
 
 
+  @Nullable
+  public static PsiClass resolveClassInType(@Nullable PsiType type) {
+    return ReadAction.compute(() -> PsiUtil.resolveClassInType(type));
+  }
+
+
+  public static String getCanonicalTextOfType(PsiType type) {
+    return ReadAction.compute(type::getCanonicalText);
+  }
+
+
   /**
    * @return true if type can be converted from a single String.
    */
   public static boolean isValueType(PsiType type) {
     // From Spring 'org.springframework.boot.convert.ApplicationConversionService'
-    return isPhysical(type)
+    return ReadAction.compute(() -> isPhysical(type)
         && (TypeConversionUtil.isAssignableFromPrimitiveWrapper(type)
                 || TypeConversionUtil.isPrimitiveAndNotNullOrWrapper(type)
                 || TypeConversionUtil.isEnumType(type)
-                || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_LANG_STRING)
-                || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_LANG_CLASS)
-                || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_NIO_CHARSET_CHARSET)
-                || PsiTypesUtil.classNameEquals(type, "java.util.Locale")
-                || PsiTypesUtil.classNameEquals(type, "java.nio.charset.Charset")
-                || PsiTypesUtil.classNameEquals(type, "java.util.Currency")
-                || PsiTypesUtil.classNameEquals(type, "java.util.UUID")
-                || PsiTypesUtil.classNameEquals(type, "java.util.regex.Pattern")
-                || PsiTypesUtil.classNameEquals(type, "kotlin.text.Regex")
-                || PsiTypesUtil.classNameEquals(type, "java.util.TimeZone")
-                || PsiTypesUtil.classNameEquals(type, "java.time.ZoneId")
-                || PsiTypesUtil.classNameEquals(type, "java.time.ZonedDateTime")
-                || PsiTypesUtil.classNameEquals(type, "java.util.Calendar")
-                || PsiTypesUtil.classNameEquals(type, "java.time.Duration")
-                || PsiTypesUtil.classNameEquals(type, "java.time.Period")
-                || PsiTypesUtil.classNameEquals(type, "org.springframework.util.unit.DataSize")
-                || PsiTypesUtil.classNameEquals(type, "java.io.File")
-                || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_NET_URI)
-                || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_NET_URL)
-                || PsiTypesUtil.classNameEquals(type, "java.net.InetAddress")
-                || PsiTypesUtil.classNameEquals(type, "org.springframework.core.io.Resource")
-                || PsiTypesUtil.classNameEquals(type, "org.springframework.http.MediaType")
-                || canConvertFromString(type));
+                || isClassNameEquals(type, CommonClassNames.JAVA_LANG_STRING)
+                || isClassNameEquals(type, CommonClassNames.JAVA_LANG_CLASS)
+                || isClassNameEquals(type, CommonClassNames.JAVA_NIO_CHARSET_CHARSET)
+                || isClassNameEquals(type, "java.util.Locale")
+                || isClassNameEquals(type, "java.nio.charset.Charset")
+                || isClassNameEquals(type, "java.util.Currency")
+                || isClassNameEquals(type, "java.util.UUID")
+                || isClassNameEquals(type, "java.util.regex.Pattern")
+                || isClassNameEquals(type, "kotlin.text.Regex")
+                || isClassNameEquals(type, "java.util.TimeZone")
+                || isClassNameEquals(type, "java.time.ZoneId")
+                || isClassNameEquals(type, "java.time.ZonedDateTime")
+                || isClassNameEquals(type, "java.util.Calendar")
+                || isClassNameEquals(type, "java.time.Duration")
+                || isClassNameEquals(type, "java.time.Period")
+                || isClassNameEquals(type, "org.springframework.util.unit.DataSize")
+                || isClassNameEquals(type, "java.io.File")
+                || isClassNameEquals(type, CommonClassNames.JAVA_NET_URI)
+                || isClassNameEquals(type, CommonClassNames.JAVA_NET_URL)
+                || isClassNameEquals(type, "java.net.InetAddress")
+                || isClassNameEquals(type, "org.springframework.core.io.Resource")
+                || isClassNameEquals(type, "org.springframework.http.MediaType")
+                || canConvertFromString(type)));
   }
 
 
   public static boolean isPhysical(PsiType type) {
-    PsiClass psiClass = PsiTypesUtil.getPsiClass(type);
-    if (psiClass == null) return false;
-    return type.isValid() && psiClass.isPhysical();
+    return ReadAction.compute(() -> {
+      PsiClass psiClass = PsiTypesUtil.getPsiClass(type);
+      if (psiClass == null) return false;
+      return type.isValid() && psiClass.isPhysical();
+    });
   }
 
 
@@ -97,17 +112,20 @@ public class PsiTypeUtils {
   public static boolean isCollection(Project project, @Nullable PsiType type) {
     if (type == null) return false;
     if (type instanceof PsiArrayType) return true;
-    return PsiType.getTypeByName(
-            CommonClassNames.JAVA_UTIL_COLLECTION, project, GlobalSearchScope.allScope(project))
-        .isAssignableFrom(type);
+    PsiClassType collectionType = getJavaTypeByName(project, CommonClassNames.JAVA_UTIL_COLLECTION);
+    return ReadAction.compute(() -> collectionType.isAssignableFrom(type));
   }
 
 
   public static boolean isMap(Project project, @Nullable PsiType type) {
     if (type == null) return false;
-    return PsiType.getTypeByName(
-            CommonClassNames.JAVA_UTIL_MAP, project, GlobalSearchScope.allScope(project))
-        .isAssignableFrom(type);
+    PsiClassType mapType = getJavaTypeByName(project, CommonClassNames.JAVA_UTIL_MAP);
+    return ReadAction.compute(() -> mapType.isAssignableFrom(type));
+  }
+
+
+  public static boolean isClassNameEquals(PsiType type, String className) {
+    return ReadAction.compute(() -> PsiTypesUtil.classNameEquals(type, className));
   }
 
 
@@ -117,16 +135,16 @@ public class PsiTypeUtils {
   @Nullable
   public static PsiType getElementType(Project project, PsiType collectionOrArrayType) {
     if (collectionOrArrayType instanceof PsiClassType type && isCollection(project, type)) {
-      if (PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_LIST)
-          || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_ARRAY_LIST)
-          || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_LINKED_LIST)
-          || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_SET)
-          || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_HASH_SET)
-          || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_LINKED_HASH_SET)
-          || PsiTypesUtil.classNameEquals(type, CommonClassNames.JAVA_UTIL_SORTED_SET)) {
-        return type.getParameters()[0];
+      if (isClassNameEquals(type, CommonClassNames.JAVA_UTIL_LIST)
+          || isClassNameEquals(type, CommonClassNames.JAVA_UTIL_ARRAY_LIST)
+          || isClassNameEquals(type, CommonClassNames.JAVA_UTIL_LINKED_LIST)
+          || isClassNameEquals(type, CommonClassNames.JAVA_UTIL_SET)
+          || isClassNameEquals(type, CommonClassNames.JAVA_UTIL_HASH_SET)
+          || isClassNameEquals(type, CommonClassNames.JAVA_UTIL_LINKED_HASH_SET)
+          || isClassNameEquals(type, CommonClassNames.JAVA_UTIL_SORTED_SET)) {
+        return ReadAction.compute(type::getParameters)[0];
       } else {
-        PsiType[] parameters = type.getParameters();
+        PsiType[] parameters = ReadAction.compute(type::getParameters);
         if (parameters.length == 1) {
           log.warn("Try to retrieve element type from sub-classes of Collection \""
               + type + "\", this may be a wrong result");
@@ -138,7 +156,7 @@ public class PsiTypeUtils {
         }
       }
     } else if (collectionOrArrayType instanceof PsiArrayType arrayType) {
-      return arrayType.getComponentType();
+      return ReadAction.compute(arrayType::getComponentType);
     } else {
       throw new IllegalArgumentException("Unsupported type: " + collectionOrArrayType);
     }
@@ -152,19 +170,19 @@ public class PsiTypeUtils {
   @Size(min = 2, max = 2)
   public static PsiType[] getKeyValueType(Project project, @Nullable PsiType mapType) {
     if (mapType == null) return null;
-    if (PsiTypesUtil.classNameEquals(mapType, CommonClassNames.JAVA_UTIL_MAP)
-        || PsiTypesUtil.classNameEquals(mapType, CommonClassNames.JAVA_UTIL_HASH_MAP)
-        || PsiTypesUtil.classNameEquals(mapType, CommonClassNames.JAVA_UTIL_CONCURRENT_HASH_MAP)
-        || PsiTypesUtil.classNameEquals(mapType, CommonClassNames.JAVA_UTIL_LINKED_HASH_MAP)) {
-      return mapType instanceof PsiClassType classType ? classType.getParameters() : null;
-    } else if (PsiTypesUtil.classNameEquals(mapType, CommonClassNames.JAVA_UTIL_PROPERTIES)) {
+    if (isClassNameEquals(mapType, CommonClassNames.JAVA_UTIL_MAP)
+        || isClassNameEquals(mapType, CommonClassNames.JAVA_UTIL_HASH_MAP)
+        || isClassNameEquals(mapType, CommonClassNames.JAVA_UTIL_CONCURRENT_HASH_MAP)
+        || isClassNameEquals(mapType, CommonClassNames.JAVA_UTIL_LINKED_HASH_MAP)) {
+      return mapType instanceof PsiClassType classType ? ReadAction.compute(classType::getParameters) : null;
+    } else if (isClassNameEquals(mapType, CommonClassNames.JAVA_UTIL_PROPERTIES)) {
       // java.util.Properties implements Map<Object,Object>, we should manually force it to string.
-      PsiType stringType = PsiTypeUtils.getJavaLangString(project);
+      PsiType stringType = getJavaLangString(project);
       return new PsiType[]{stringType, stringType};
     } else if (isMap(project, mapType)) {
       //TODO Support sub-classes of Map, with generics.
       if (mapType instanceof PsiClassType classType) {
-        PsiType[] parameters = classType.getParameters();
+        PsiType[] parameters = ReadAction.compute(classType::getParameters);
         if (parameters.length == 2) {
           log.warn("Try to retrieve key & value types from sub-classes of Map \""
               + mapType + "\", this may be a wrong result");
@@ -193,7 +211,7 @@ public class PsiTypeUtils {
           .map(list -> list.getParameter(0))
           .filter(Objects::nonNull)
           .map(PsiParameter::getType)
-          .anyMatch(t -> PsiTypesUtil.classNameEquals(t, CommonClassNames.JAVA_LANG_STRING));
+          .anyMatch(t -> isClassNameEquals(t, CommonClassNames.JAVA_LANG_STRING));
     }
     return false;
   }

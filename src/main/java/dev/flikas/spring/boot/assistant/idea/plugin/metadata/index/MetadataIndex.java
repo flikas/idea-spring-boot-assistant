@@ -8,72 +8,85 @@ import java.util.Collection;
 import java.util.Collections;
 
 public interface MetadataIndex {
-  MetadataIndex EMPTY = new MetadataIndex() {
-    //region empty implements
-    @Override
-    public boolean isEmpty() {
-      return true;
-    }
+  static MetadataIndex empty(Project project) {
+    return new MetadataIndex() {
+      //region empty implements
+      @Override
+      public boolean isEmpty() {
+        return true;
+      }
 
 
-    @Override
-    public @NotNull Project getProject() {
-      return null;
-    }
+      @Override
+      public @NotNull Project getProject() {
+        return project;
+      }
 
 
-    @Override
-    public @Nullable MetadataGroup getGroup(String name) {
-      return null;
-    }
+      @Override
+      public @NotNull String getSource() {
+        return "";
+      }
 
 
-    @Override
-    public @NotNull Collection<MetadataGroup> getGroups() {
-      return Collections.emptyList();
-    }
+      @Override
+      public @Nullable MetadataGroup getGroup(String name) {
+        return null;
+      }
 
 
-    @Override
-    public MetadataProperty getProperty(String name) {
-      return null;
-    }
+      @Override
+      public @NotNull Collection<MetadataGroup> getGroups() {
+        return Collections.emptyList();
+      }
 
 
-    @Override
-    public MetadataProperty getNearestParentProperty(String name) {
-      return null;
-    }
+      @Override
+      public MetadataProperty getProperty(String name) {
+        return null;
+      }
 
 
-    @Override
-    public @NotNull Collection<MetadataProperty> getProperties() {
-      return Collections.emptyList();
-    }
+      @Override
+      public MetadataProperty getNearestParentProperty(String name) {
+        return null;
+      }
 
 
-    @Override
-    public MetadataHint getHint(String name) {
-      return null;
-    }
+      @Override
+      public @NotNull Collection<MetadataProperty> getProperties() {
+        return Collections.emptyList();
+      }
 
 
-    @Override
-    public @NotNull Collection<MetadataHint> getHints() {
-      return Collections.emptyList();
-    }
+      @Override
+      public MetadataHint getHint(String name) {
+        return null;
+      }
 
 
-    @Override
-    public MetadataItem getPropertyOrGroup(String name) {
-      return null;
-    }
-    //endregion
-  };
+      @Override
+      public @NotNull Collection<MetadataHint> getHints() {
+        return Collections.emptyList();
+      }
+
+
+      @Override
+      public MetadataItem getPropertyOrGroup(String name) {
+        return null;
+      }
+      //endregion
+    };
+  }
 
   boolean isEmpty();
 
   @NotNull Project getProject();
+
+  /**
+   * Source file url or source type FQN, maybe empty string.
+   */
+  @NotNull String getSource();
 
   @NotNull Collection<MetadataGroup> getGroups();
 

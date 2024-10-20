@@ -1,7 +1,7 @@
 Spring Boot Assistant - IntelliJ-based plugin that assists you in developing spring boot applications
 =====================================================================================
 
-![Plugin in action](help.gif)
+![Plugin in action](docs/help.gif)
 
 ## What does the plugin do
 

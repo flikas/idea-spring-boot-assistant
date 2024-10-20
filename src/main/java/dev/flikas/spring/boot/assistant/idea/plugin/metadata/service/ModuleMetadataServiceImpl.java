@@ -1,60 +1,75 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.service;
 
-import com.intellij.openapi.application.ReadAction;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ModuleRootEvent;
-import com.intellij.openapi.roots.ModuleRootListener;
-import com.intellij.openapi.roots.ModuleRootManager;
+import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.search.FilenameIndex;
+import com.intellij.psi.search.GlobalSearchScope;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.AggregatedMetadataIndex;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ProjectMetadataService.ADDITIONAL_METADATA_FILE_NAME;
+import static dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ProjectMetadataService.METADATA_FILE_NAME;
 
 final class ModuleMetadataServiceImpl implements ModuleMetadataService {
+  private static final Logger LOG = Logger.getInstance(ModuleMetadataServiceImpl.class);
+  private final Project project;
   private final Module module;
-  private MetadataIndex index = MetadataIndex.EMPTY;
+  private MetadataIndex index;
   private Set<String> classRootsUrlSnapshot = new HashSet<>();
 
 
   public ModuleMetadataServiceImpl(Module module) {
     this.module = module;
-    // add change listener
-    // TODO WorkspaceModel.eventLog is better, but it is in experimental for now.
-    module.getProject().getMessageBus().connect().subscribe(ModuleRootListener.TOPIC, new ModuleRootListener() {
-      @Override
-      public void rootsChanged(@NotNull ModuleRootEvent event) {
-        ReadAction.run(ModuleMetadataServiceImpl.this::refreshMetadata);
-      }
-    });
+    this.project = module.getProject();
+    this.index = this.project.getService(ProjectMetadataService.class).getEmptyIndex();
     // read metadata for the first time
-    ReadAction.run(this::refreshMetadata);
+    refreshMetadata();
   }
 
 
   @Override
-  public MetadataIndex getIndex() {
+  public @NotNull MetadataIndex getIndex() {
     return index;
   }
 
 
-  private synchronized void refreshMetadata() {
-    VirtualFile[] roots = ModuleRootManager.getInstance(this.module).orderEntries().withoutSdk().classes().getRoots();
+  synchronized void refreshMetadata() {
+    LOG.info("Try refreshing metadata for module " + this.module.getName());
+    @NotNull ProjectFileIndex pfi = ProjectFileIndex.getInstance(project);
+    @NotNull GlobalSearchScope scope = module.getModuleWithDependenciesAndLibrariesScope(false);
+    VirtualFile[] roots = DumbService.getInstance(project).runReadActionInSmartMode(() -> Stream.concat(
+            FilenameIndex.getVirtualFilesByName(METADATA_FILE_NAME, scope).stream(),
+            FilenameIndex.getVirtualFilesByName(ADDITIONAL_METADATA_FILE_NAME, scope).stream())
+        .map(pfi::getClassRootForFile)
+        .distinct()
+        .filter(Objects::nonNull)
+        .toArray(VirtualFile[]::new));
     Set<String> classRootsUrl = Arrays.stream(roots).map(VirtualFile::getUrl).collect(Collectors.toSet());
+
     if (classRootsUrlSnapshot.equals(classRootsUrl)) {
       // No dependency changed, no need to refresh metadata.
       return;
     }
-    Project project = this.module.getProject();
+    LOG.info("Module \"" + this.module.getName() + "\"'s metadata needs refresh");
+    LOG.info("Class root candidates: " + Arrays.toString(roots));
     ProjectMetadataService pms = project.getService(ProjectMetadataService.class);
     AggregatedMetadataIndex meta = new AggregatedMetadataIndex();
     for (VirtualFile root : roots) {
-      meta.addLast(pms.getMetadata(root));
+      pms.getIndexForClassRoot(root)
+          .filter(p -> !Objects.requireNonNull(p.dereference()).isEmpty())
+          .ifPresent(meta::addLast);
     }
     if (!meta.isEmpty()) {
       this.index = meta;
