@@ -2,6 +2,7 @@ package dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.platform;
 
 import com.google.gson.Gson;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.indexing.DataIndexer;
@@ -10,11 +11,17 @@ import com.intellij.util.indexing.FileBasedIndexExtension;
 import com.intellij.util.indexing.FileContent;
 import com.intellij.util.indexing.ID;
 import com.intellij.util.io.DataExternalizer;
+import com.intellij.util.io.IOUtil;
 import com.intellij.util.io.KeyDescriptor;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.ConfigurationMetadataIndex;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyName;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -56,10 +63,13 @@ public class MetadataPropertyIndex extends FileBasedIndexExtension<PropertyName,
       public @NotNull Map<PropertyName, MetadataProperty> map(@NotNull FileContent inputData) {
         List<PsiDirectory> parents = PsiTreeUtil.collectParents(inputData.getPsiFile(), PsiDirectory.class,
             false, Objects::isNull);
-        if (parents.size() == 1 && parents.getFirst().getName().equals("META-INF")) {
-
-        }
-        return Map.of();
+        if (parents.size() != 1 || !parents.getFirst().getName().equals("META-INF")) {return Map.of();}
+        ConfigurationMetadata meta = gson.get()
+            .fromJson(inputData.getContentAsText().toString(), ConfigurationMetadata.class);
+        Project project = inputData.getProject();
+        ConfigurationMetadataIndex index = new ConfigurationMetadataIndex(project,
+            inputData.getFile().getPath(), meta);
+        return index.getProperties();
       }
     };
   }
@@ -73,8 +83,18 @@ public class MetadataPropertyIndex extends FileBasedIndexExtension<PropertyName,
 
   @Override
   public @NotNull DataExternalizer<MetadataProperty> getValueExternalizer() {
-    //TODO Implement this.
-    return null;
+    return new DataExternalizer<>() {
+      @Override
+      public void save(@NotNull DataOutput out, MetadataProperty value) throws IOException {
+        IOUtil.writeUTF(out, gson.get().toJson(value.getMetadata()));
+      }
+
+
+      @Override
+      public MetadataProperty read(@NotNull DataInput in) throws IOException {
+        return gson.get().fromJson(IOUtil.readUTF(in), ConfigurationMetadata.Property.class);
+      }
+    };
   }
 
 

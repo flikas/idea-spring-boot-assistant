@@ -33,7 +33,7 @@ import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.removeGene
 import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.updateClassNameAsJavadocHtml;
 
 @SuppressWarnings("UnstableApiUsage")
-public class PropertyDocumentationTarget implements DocumentationTarget {
+public class PropertyDocumentationTarget implements ProjectDocumentationTarget {
   private final MetadataProperty property;
   private final Project project;
 
@@ -41,6 +41,12 @@ public class PropertyDocumentationTarget implements DocumentationTarget {
   public PropertyDocumentationTarget(MetadataProperty property) {
     this.property = property;
     this.project = property.getIndex().getProject();
+  }
+
+
+  @Override
+  public Project getProject() {
+    return this.project;
   }
 
 

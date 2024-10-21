@@ -9,6 +9,8 @@ resilience4j:
         # Inspection::KeyNotDefined(positive, Map<String, POJO>)
         allowHealthIndicatorToFail: false
 server:
+  compression:
+    enabled: true
   servlet:
     encoding:
       "mapping":

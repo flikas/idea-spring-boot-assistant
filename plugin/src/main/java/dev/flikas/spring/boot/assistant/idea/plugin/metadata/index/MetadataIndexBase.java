@@ -22,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -66,8 +66,8 @@ abstract class MetadataIndexBase implements MetadataIndex {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public @NotNull Collection<MetadataGroup> getGroups() {
-    return (Collection) groups.values();
+  public @NotNull Map<PropertyName, MetadataGroup> getGroups() {
+    return Collections.unmodifiableMap(groups);
   }
 
 
@@ -91,8 +91,8 @@ abstract class MetadataIndexBase implements MetadataIndex {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public @NotNull Collection<MetadataProperty> getProperties() {
-    return (Collection) properties.values();
+  public @NotNull Map<PropertyName, MetadataProperty> getProperties() {
+    return Collections.unmodifiableMap(properties);
   }
 
 
@@ -105,8 +105,8 @@ abstract class MetadataIndexBase implements MetadataIndex {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   @Override
-  public @NotNull Collection<MetadataHint> getHints() {
-    return (Collection) hints.values();
+  public @NotNull Map<PropertyName, MetadataHint> getHints() {
+    return Collections.unmodifiableMap(hints);
   }
 
 

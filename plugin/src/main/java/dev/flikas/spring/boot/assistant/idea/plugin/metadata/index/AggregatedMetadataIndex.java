@@ -1,12 +1,13 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.index;
 
 import com.intellij.openapi.project.Project;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyName;
 import dev.flikas.spring.boot.assistant.idea.plugin.misc.MutableReference;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
 import java.util.Deque;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
@@ -78,8 +79,9 @@ public class AggregatedMetadataIndex implements MetadataIndex {
 
 
   @Override
-  public @NotNull Collection<MetadataGroup> getGroups() {
-    return getIndexStream().flatMap(index -> index.getGroups().stream()).toList();
+  public @NotNull Map<PropertyName, MetadataGroup> getGroups() {
+    return getIndexStream().flatMap(index -> index.getGroups().entrySet().stream()).collect(
+        Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
 
@@ -102,8 +104,9 @@ public class AggregatedMetadataIndex implements MetadataIndex {
 
 
   @Override
-  public @NotNull Collection<MetadataProperty> getProperties() {
-    return getIndexStream().flatMap(index -> index.getProperties().stream()).toList();
+  public @NotNull Map<PropertyName, MetadataProperty> getProperties() {
+    return getIndexStream().flatMap(index -> index.getProperties().entrySet().stream()).collect(
+        Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
 
@@ -117,8 +120,9 @@ public class AggregatedMetadataIndex implements MetadataIndex {
 
 
   @Override
-  public @NotNull Collection<MetadataHint> getHints() {
-    return getIndexStream().flatMap(index -> index.getHints().stream()).toList();
+  public @NotNull Map<PropertyName, MetadataHint> getHints() {
+    return getIndexStream().flatMap(index -> index.getHints().entrySet().stream()).collect(
+        Collectors.toUnmodifiableMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
 

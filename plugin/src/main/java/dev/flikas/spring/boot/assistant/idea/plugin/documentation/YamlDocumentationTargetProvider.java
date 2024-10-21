@@ -17,31 +17,35 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.yaml.YAMLUtil;
 import org.jetbrains.yaml.psi.YAMLKeyValue;
 
+import java.util.Collections;
+import java.util.List;
+
 public class YamlDocumentationTargetProvider implements PsiDocumentationTargetProvider {
   @Override
-  public @Nullable DocumentationTarget documentationTarget(
+  public @NotNull List<@NotNull DocumentationTarget> documentationTargets(
       @NotNull PsiElement element, @Nullable PsiElement originalElement
   ) {
+    if (originalElement != null) element = originalElement;
     if (!PsiElementUtils.isInFileOfType(element, SpringBootConfigurationYamlFileType.INSTANCE)) {
-      return null;
+      return Collections.emptyList();
     }
     Module module = PsiCustomUtil.findModule(element);
     if (module == null) {
-      return null;
+      return Collections.emptyList();
     }
     // Find context YAMLKeyValue, stop if context is not at the same line.
     YAMLKeyValue keyValue = PsiTreeUtil.getContextOfType(element, false, YAMLKeyValue.class);
-    if (keyValue == null) return null;
-    if (!YAMLUtil.psiAreAtTheSameLine(element, keyValue)) return null;
+    if (keyValue == null) return Collections.emptyList();
+    if (!YAMLUtil.psiAreAtTheSameLine(element, keyValue)) return Collections.emptyList();
 
     String propertyName = YAMLUtil.getConfigFullName(keyValue);
     ModuleMetadataService service = module.getService(ModuleMetadataService.class);
     @Nullable MetadataItem propertyOrGroup = service.getIndex().getPropertyOrGroup(propertyName);
-    if (propertyOrGroup == null) return null;
+    if (propertyOrGroup == null) return Collections.emptyList();
 
     return switch (propertyOrGroup) {
-      case MetadataProperty property -> new PropertyDocumentationTarget(property);
-      case MetadataGroup group -> new GroupDocumentationTarget(group);
+      case MetadataProperty property -> List.of(new PropertyDocumentationTarget(property));
+      case MetadataGroup group -> List.of(GroupDocumentationTarget.createTargets(group));
       default -> throw new IllegalStateException("Unsupported type: " + propertyOrGroup.getClass());
     };
   }

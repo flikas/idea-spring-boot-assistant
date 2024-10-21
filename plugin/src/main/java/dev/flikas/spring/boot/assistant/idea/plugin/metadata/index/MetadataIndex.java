@@ -1,11 +1,11 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.index;
 
 import com.intellij.openapi.project.Project;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyName;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Map;
 
 public interface MetadataIndex {
   static MetadataIndex empty(Project project) {
@@ -36,12 +36,6 @@ public interface MetadataIndex {
 
 
       @Override
-      public @NotNull Collection<MetadataGroup> getGroups() {
-        return Collections.emptyList();
-      }
-
-
-      @Override
       public MetadataProperty getProperty(String name) {
         return null;
       }
@@ -54,20 +48,26 @@ public interface MetadataIndex {
 
 
       @Override
-      public @NotNull Collection<MetadataProperty> getProperties() {
-        return Collections.emptyList();
-      }
-
-
-      @Override
       public MetadataHint getHint(String name) {
         return null;
       }
 
 
       @Override
-      public @NotNull Collection<MetadataHint> getHints() {
-        return Collections.emptyList();
+      public @NotNull Map<PropertyName, MetadataGroup> getGroups() {
+        return Map.of();
+      }
+
+
+      @Override
+      public @NotNull Map<PropertyName, MetadataProperty> getProperties() {
+        return Map.of();
+      }
+
+
+      @Override
+      public @NotNull Map<PropertyName, MetadataHint> getHints() {
+        return Map.of();
       }
 
 
@@ -88,11 +88,11 @@ public interface MetadataIndex {
    */
   @NotNull String getSource();
 
-  @NotNull Collection<MetadataGroup> getGroups();
+  @NotNull Map<PropertyName, MetadataGroup> getGroups();
 
-  @NotNull Collection<MetadataProperty> getProperties();
+  @NotNull Map<PropertyName, MetadataProperty> getProperties();
 
-  @NotNull Collection<MetadataHint> getHints();
+  @NotNull Map<PropertyName, MetadataHint> getHints();
 
   @Nullable MetadataGroup getGroup(String name);
 
