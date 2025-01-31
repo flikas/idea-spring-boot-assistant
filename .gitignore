@@ -1,6 +1,5 @@
 build/
 .gradle/
-.idea/
 target/
 out/
 .project
@@ -8,7 +7,6 @@ out/
 /bootstrap.xml
 /font-awesome.xml
 *.*~
-*.iml
 **/*.iml
 *.ipl
 **/*.ipl
@@ -18,3 +16,5 @@ out/
 /private.pem
 /cache
 /.intellijPlatform
+.idea
+!/.idea/codeStyles

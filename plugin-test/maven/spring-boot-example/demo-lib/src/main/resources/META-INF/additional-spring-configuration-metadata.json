@@ -1,0 +1,19 @@
+{
+  "groups": [
+    {
+      "name": "oo",
+      "type": "dev.flikas.LombokPojo",
+      "sourceType": "dev.flikas.MyApp",
+      "sourceMethod": "lombokPojo()"
+    }
+  ],
+  "properties": [
+    {
+      "name": "oo.b",
+      "type": "java.lang.String",
+      "description": "中文说明",
+      "sourceType": "dev.flikas.LombokPojo"
+    }
+  ],
+  "hints": []
+}
