@@ -131,9 +131,7 @@ intellijPlatform {
     // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-tasks.html#publishPlugin
     publishing {
         token = System.getenv("PUBLISH_TOKEN")
-        channels = listOf(
-            (version.toString().split('-').firstOrNull() ?: "default").split('.', '+').first()
-        )
+        channels = listOf(version.toString().split('-').run { if (size > 1) last() else "default" })
     }
 
     pluginVerification {
