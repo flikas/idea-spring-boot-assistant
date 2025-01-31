@@ -152,6 +152,10 @@ tasks {
         options.release = properties("platform.java-version").toInt()
     }
 
+    buildPlugin {
+        archiveFileName = properties("plugin.name").lowercase().replace(' ', '-') + "-$version.zip"
+    }
+
     runIde {
         jvmArgs("-ea", "-Xdebug")
         systemProperty("idea.is.internal", "true")
