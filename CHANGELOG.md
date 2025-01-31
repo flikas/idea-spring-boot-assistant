@@ -8,6 +8,20 @@ to [Semantic Versioning](https://semver.org).
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## 600.0.0+242 - 2025-01-30
+
+### Added
+
 - Code completion
   for most
   of [the value providers](https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html#configuration-metadata.manual-hints.value-providers).
@@ -18,14 +32,6 @@ to [Semantic Versioning](https://semver.org).
 
 - Performance improvement: It is no longer necessary to load the Spring configuration metadata each time the project is
   opened.
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
 
 ## 242.2.0 - 2024-09-18
 

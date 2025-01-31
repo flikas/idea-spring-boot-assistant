@@ -88,7 +88,7 @@ intellijPlatform {
         }
         changeNotes = changelog.run {
             renderItem(
-                if (isRelease()) get(project.version as String) else getUnreleased(),
+                getOrNull(project.version as String) ?: getUnreleased(),
                 Changelog.OutputType.HTML
             )
         }
