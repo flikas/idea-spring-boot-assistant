@@ -27,8 +27,8 @@ public class YamlReferenceContributor extends PsiReferenceContributor {
             .inVirtualFile(virtualFile().ofType(SpringBootConfigurationYamlFileType.INSTANCE));
     registrar.registerReferenceProvider(pattern, new PsiReferenceProvider() {
       @Override
-      public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement element,
-                                                             @NotNull ProcessingContext context) {
+      @NotNull
+      public PsiReference[] getReferencesByElement(@NotNull PsiElement element, @NotNull ProcessingContext context) {
         if (element instanceof YAMLKeyValue yamlKeyValue) {
           return new YamlKeyToPsiReference[]{new YamlKeyToPsiReference(yamlKeyValue)};
         } else {

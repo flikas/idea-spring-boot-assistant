@@ -10,6 +10,7 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiJvmMember;
 import com.intellij.psi.PsiType;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataGroup;
+import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataItem;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.hint.Hint;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationMetadata;
@@ -34,6 +35,17 @@ import static com.intellij.lang.documentation.DocumentationMarkup.SECTION_HEADER
 public final class DocumentationService {
   public static DocumentationService getInstance(Project project) {
     return project.getService(DocumentationService.class);
+  }
+
+
+  public String generateDoc(MetadataItem item) {
+    if (item instanceof MetadataProperty property) {
+      return generateDoc(property);
+    } else if (item instanceof MetadataGroup group) {
+      return generateDoc(group);
+    } else {
+      throw new IllegalArgumentException("Unsupported argument type: " + item.getClass());
+    }
   }
 
 

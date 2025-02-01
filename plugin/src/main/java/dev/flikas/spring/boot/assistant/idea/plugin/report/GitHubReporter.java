@@ -32,7 +32,7 @@ public class GitHubReporter extends ErrorReportSubmitter {
 
   @Override
   public boolean submit(
-      IdeaLoggingEvent @NotNull [] events, @Nullable String additionalInfo,
+      @NotNull IdeaLoggingEvent[] events, @Nullable String additionalInfo,
       @NotNull Component parentComponent, @NotNull Consumer<? super SubmittedReportInfo> consumer
   ) {
     if (events.length == 0) {

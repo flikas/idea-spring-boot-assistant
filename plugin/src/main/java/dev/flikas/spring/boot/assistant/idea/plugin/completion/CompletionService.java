@@ -250,7 +250,7 @@ public final class CompletionService {
       case null, default -> {
         LookupElementBuilder le = ReadAction.compute(() ->
             LookupElementBuilder.create(hint.value()).withIcon(hint.icon())
-                .withPsiElement(new HintDocumentationVirtualElement(hint, PsiManager.getInstance(project)))
+                .withPsiElement(new SourceContainer(hint, project))
                 .withInsertHandler(YamlValueInsertHandler.INSTANCE));
         if (StringUtils.isNotBlank(hint.oneLineDescription())) {
           le = le.withTailText("(" + hint.oneLineDescription() + ")", true);

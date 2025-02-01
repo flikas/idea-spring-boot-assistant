@@ -5,7 +5,6 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ModuleRootModel;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.platform.backend.workspace.WorkspaceModelTopics;
 import com.intellij.task.ProjectTaskListener;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
 import dev.flikas.spring.boot.assistant.idea.plugin.misc.MutableReference;
@@ -20,7 +19,7 @@ import static com.intellij.openapi.compiler.CompilerTopics.COMPILATION_STATUS;
 /**
  * Service that generates {@link MetadataIndex} from one {@linkplain ModuleRootModel#getSourceRoots() SourceRoot}.
  * <p>
- * It searches and generate index from Spring Configuration Files ({@value METADATA_FILE}, {@value ADDITIONAL_METADATA_FILE})
+ * It searches and generate index from Spring Configuration Files
  * in the source root and watches them for automatically update the index.
  */
 @Service(Service.Level.PROJECT)
@@ -35,9 +34,8 @@ final class ProjectMetadataService implements Disposable {
     this.emptyIndex = MetadataIndex.empty(this.project);
     CompilationListener compilationListener = new CompilationListener(project);
     project.getMessageBus().connect().subscribe(COMPILATION_STATUS, compilationListener);
-    project.getMessageBus().connect()
-        .subscribe(ProjectTaskListener.TOPIC, compilationListener);  // For gradle delegated build
-    project.getMessageBus().connect().subscribe(WorkspaceModelTopics.CHANGED, new ModuleDependenciesWatcher(project));
+    // For gradle delegated build
+    project.getMessageBus().connect().subscribe(ProjectTaskListener.TOPIC, compilationListener);
   }
 
 
