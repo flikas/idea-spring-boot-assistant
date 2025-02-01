@@ -13,7 +13,7 @@ public interface MetadataGroup extends MetadataItem {
 
   @Override
   default @NotNull Pair<String, Icon> getIcon() {
-    return new Pair<>("AllIcons.FileTypes.SourceMap", AllIcons.FileTypes.SourceMap);
+    return new Pair<>("AllIcons.Nodes.Folder", AllIcons.Nodes.Folder);
   }
 
   Optional<PsiMethod> getSourceMethod();

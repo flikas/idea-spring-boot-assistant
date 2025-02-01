@@ -101,7 +101,7 @@ public class LoggerNameValueProvider extends AbstractValueProvider {
       switch (type) {
         case PACKAGE -> suggestions.add(new Hint(name, AllIcons.Nodes.Package));
         case CLASS -> suggestions.add(new Hint(name, AllIcons.Nodes.Class));
-        case GROUP -> suggestions.add(new Hint(name, "User-defined log group", null, AllIcons.General.Groups));
+        case GROUP -> suggestions.add(new Hint(name, "User-defined log group", null, AllIcons.Nodes.WebFolder));
       }
     });
     return suggestions;
