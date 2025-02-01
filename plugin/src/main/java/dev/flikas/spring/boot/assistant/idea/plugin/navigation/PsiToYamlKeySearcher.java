@@ -16,7 +16,7 @@ public class PsiToYamlKeySearcher extends QueryExecutorBase<PsiReference, Refere
 
   @Override
   public void processQuery(
-      ReferencesSearch.@NotNull SearchParameters queryParameters, @NotNull Processor<? super PsiReference> consumer) {
+      @NotNull ReferencesSearch.SearchParameters queryParameters, @NotNull Processor<? super PsiReference> consumer) {
     PsiElement element = queryParameters.getElementToSearch();
     if (!element.isValid()) return;
 

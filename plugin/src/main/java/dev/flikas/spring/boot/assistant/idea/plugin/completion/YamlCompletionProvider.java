@@ -48,7 +48,7 @@ class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
     }
 
     // Find context YAMLPsiElement, stop if context is not at the same line.
-    @Nullable YAMLPsiElement context = PsiTreeUtil.getParentOfType(element, false, YAMLPsiElement.class);
+    @Nullable YAMLPsiElement context = PsiTreeUtil.getParentOfType(element, YAMLPsiElement.class, false);
     if (context == null) return;
     if (!YAMLUtil.psiAreAtTheSameLine(element, context)) return;
 
@@ -59,8 +59,8 @@ class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
     queryString = StringUtils.remove(queryString, DUMMY_IDENTIFIER);
     queryString = StringUtils.removeEnd(queryString, DUMMY_IDENTIFIER_TRIMMED);
     CompletionService service = CompletionService.getInstance(project);
-    YAMLKeyValue nearestKeyValue = PsiTreeUtil.getParentOfType(context, false, YAMLKeyValue.class);
-    YAMLSequenceItem nearestSequenceItem = PsiTreeUtil.getParentOfType(context, false, YAMLSequenceItem.class);
+    YAMLKeyValue nearestKeyValue = PsiTreeUtil.getParentOfType(context, YAMLKeyValue.class, false);
+    YAMLSequenceItem nearestSequenceItem = PsiTreeUtil.getParentOfType(context, YAMLSequenceItem.class, false);
     if (((nearestKeyValue != null && YAMLUtil.psiAreAtTheSameLine(nearestKeyValue, context))
              || (nearestSequenceItem != null && YAMLUtil.psiAreAtTheSameLine(nearestSequenceItem, context)))
         && context instanceof YAMLScalar) {
