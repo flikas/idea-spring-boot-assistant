@@ -5,6 +5,7 @@ import com.intellij.platform.backend.documentation.DocumentationTarget;
 import com.intellij.platform.backend.documentation.PsiDocumentationTargetProvider;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
+import dev.flikas.spring.boot.assistant.idea.plugin.completion.SourceContainer;
 import dev.flikas.spring.boot.assistant.idea.plugin.filetype.SpringBootConfigurationYamlFileType;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataGroup;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataItem;
@@ -23,10 +24,8 @@ public class YamlDocumentationTargetProvider implements PsiDocumentationTargetPr
   public @Nullable DocumentationTarget documentationTarget(
       @NotNull PsiElement element, @Nullable PsiElement originalElement
   ) {
-    if (element instanceof MetadataItemVirtualElement mve) {
-      return getDocumentationTarget(mve.getMetadataItem());
-    } else if (element instanceof HintDocumentationVirtualElement hdve) {
-      return hdve;
+    if (element instanceof SourceContainer ce) {
+      return getDocumentationTarget(ce);
     }
 
     if (originalElement != null) element = originalElement;
@@ -51,11 +50,21 @@ public class YamlDocumentationTargetProvider implements PsiDocumentationTargetPr
   }
 
 
-  private static @NotNull DocumentationTarget getDocumentationTarget(@NotNull MetadataItem propertyOrGroup) {
-    return switch (propertyOrGroup) {
-      case MetadataProperty property -> new PropertyDocumentationTarget(property);
-      case MetadataGroup group -> new GroupDocumentationTarget(group);
-      default -> throw new IllegalStateException("Unsupported type: " + propertyOrGroup.getClass());
-    };
+  @NotNull
+  private DocumentationTarget getDocumentationTarget(SourceContainer sc) {
+    return sc.getSourceMetadataItem().map(this::getDocumentationTarget).orElseGet(() ->
+        sc.getSourceHint().map(h -> new HintDocumentationTarget(h, sc.getProject()))
+            .orElseThrow());
+  }
+
+
+  @NotNull
+  private DocumentationTarget getDocumentationTarget(MetadataItem propertyOrGroup) {
+    if (propertyOrGroup instanceof MetadataProperty property) {
+      return new PropertyDocumentationTarget(property);
+    } else if (propertyOrGroup instanceof MetadataGroup group) {
+      return new GroupDocumentationTarget(group);
+    }
+    throw new IllegalStateException("Unsupported type: " + propertyOrGroup.getClass());
   }
 }

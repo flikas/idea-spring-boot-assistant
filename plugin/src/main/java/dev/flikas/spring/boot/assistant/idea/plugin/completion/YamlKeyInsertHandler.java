@@ -15,7 +15,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.DocumentUtil;
-import dev.flikas.spring.boot.assistant.idea.plugin.documentation.MetadataItemVirtualElement;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataGroup;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataItem;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
@@ -52,8 +51,8 @@ public class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
       return;
     }
     String existingIndentation = getExistingIndentation(context, lookupElement);
-    MetadataItem suggestion = ((MetadataItemVirtualElement) requireNonNull(
-        lookupElement.getPsiElement())).getMetadataItem();
+    MetadataItem suggestion = ((SourceContainer) requireNonNull(lookupElement.getPsiElement()))
+        .getSourceMetadataItem().orElseThrow();
     String indentPerLevel = getCodeStyleIntent(context);
     @NotNull Project project = context.getProject();
 

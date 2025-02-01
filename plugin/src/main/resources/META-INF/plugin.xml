@@ -54,7 +54,7 @@
   <depends>com.intellij.modules.java</depends>
   <depends>com.intellij.modules.lang</depends>
   <depends>org.jetbrains.plugins.yaml</depends>
-  <depends>com.intellij.properties</depends>
+  <!--  <depends>com.intellij.properties</depends>-->
 
   <!-- Optional dependency on another plugin.
        If the plugin with the "com.MySecondPlugin" ID is installed, the contents of mysecondplugin.xml

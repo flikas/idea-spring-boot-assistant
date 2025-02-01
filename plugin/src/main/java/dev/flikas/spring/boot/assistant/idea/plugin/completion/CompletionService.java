@@ -15,11 +15,8 @@ import com.intellij.openapi.components.Service;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiManager;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.PsiVariable;
-import dev.flikas.spring.boot.assistant.idea.plugin.documentation.HintDocumentationVirtualElement;
-import dev.flikas.spring.boot.assistant.idea.plugin.documentation.MetadataItemVirtualElement;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataGroup;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataHint;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataIndex;
@@ -71,7 +68,6 @@ public final class CompletionService {
    *
    * @param parentName  The context property name for querying, must be existed, such as 'spring.security', can be null or empty
    * @param queryString The user input for completion.
-   * @return Collection of {@link LookupElement} that matches the query.
    */
   public void findSuggestionForKey(
       @NotNull CompletionParameters completionParameters, @NotNull CompletionResultSet resultSet,
@@ -101,7 +97,6 @@ public final class CompletionService {
    *
    * @param propertyName The context property name for querying value, must be existed.
    * @param queryString  The user input for completion.
-   * @return Collection of {@link LookupElement} that matches the query.
    */
   public void findSuggestionForValue(
       @NotNull CompletionParameters completionParameters,
@@ -278,7 +273,7 @@ public final class CompletionService {
       return null;
     }
     LookupElementBuilder leb = LookupElementBuilder.create(removeParent(propertyNameAncestors, property.getNameStr()))
-        .withIcon(property.getIcon().getSecond()).withPsiElement(new MetadataItemVirtualElement(property))
+        .withIcon(property.getIcon().getSecond()).withPsiElement(new SourceContainer(property, project))
         .withStrikeoutness(deprecation != null).withInsertHandler(YamlKeyInsertHandler.INSTANCE);
     if (StringUtils.isNotBlank(property.getMetadata().getDescription())) {
       leb = leb.withTailText("(" + property.getMetadata().getDescription() + ")", true);
@@ -292,7 +287,7 @@ public final class CompletionService {
 
   private LookupElement createLookupElement(String propertyNameAncestors, MetadataGroup group) {
     return LookupElementBuilder.create(removeParent(propertyNameAncestors, group.getNameStr()))
-        .withIcon(group.getIcon().getSecond()).withPsiElement(new MetadataItemVirtualElement(group))
+        .withIcon(group.getIcon().getSecond()).withPsiElement(new SourceContainer(group, project))
         .withInsertHandler(YamlKeyInsertHandler.INSTANCE);
   }
 
