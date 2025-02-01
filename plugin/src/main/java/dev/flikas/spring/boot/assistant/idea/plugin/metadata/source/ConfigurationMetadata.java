@@ -2,7 +2,7 @@ package dev.flikas.spring.boot.assistant.idea.plugin.metadata.source;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
-import org.springframework.lang.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
