@@ -9,6 +9,7 @@ import org.jetbrains.intellij.platform.gradle.models.ProductRelease
  * Shortcut for <code>project.findProperty(key).toString()</code>.
  */
 fun properties(key: String) = project.findProperty(key).toString()
+fun propertyProvider(key: String) = provider { project.findProperty(key)?.toString() }
 
 /**
  * Shortcut for <code>System.getenv().getOrDefault(key, default).toString()</code>.
@@ -84,7 +85,7 @@ intellijPlatform {
         version = project.version as String
         ideaVersion {
             sinceBuild = properties("plugin.since-build")
-            untilBuild = provider { null }
+            untilBuild = propertyProvider("plugin.until-build")
         }
         changeNotes = changelog.run {
             renderItem(
@@ -140,7 +141,7 @@ intellijPlatform {
                 types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
                 channels = listOf(ProductRelease.Channel.RELEASE)
                 sinceBuild = properties("plugin.since-build")
-                untilBuild = provider { null }
+                untilBuild = propertyProvider("plugin.until-build")
             }
         }
     }
@@ -181,6 +182,6 @@ tasks {
         channels = listOf(ProductRelease.Channel.RELEASE, ProductRelease.Channel.EAP)
         types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
         sinceBuild = properties("plugin.since-build")
-        untilBuild = provider { null }
+        untilBuild = propertyProvider("plugin.until-build")
     }
 }
