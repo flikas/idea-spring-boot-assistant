@@ -7,7 +7,6 @@ import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.progress.ProgressIndicator;
 import com.intellij.openapi.progress.Task;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.task.ModuleBuildTask;
 import com.intellij.task.ProjectTaskListener;
@@ -17,6 +16,7 @@ import dev.flikas.spring.boot.assistant.idea.plugin.misc.ModuleRootUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -77,19 +77,17 @@ class CompilationListener implements CompilationStatusListener, ProjectTaskListe
       public void run(@NotNull ProgressIndicator indicator) {
         indicator.pushState();
         indicator.setIndeterminate(false);
-        List<Pair<Module, VirtualFile>> affected = new ArrayList<>();
+        List<VirtualFile> affectedClassRoots = new ArrayList<>();
         double i = 0;
         for (Module module : affectedModules) {
           assert module.getProject().equals(project);   // The 2 topics we are listening are all project-level.
           indicator.setText2(module.getName());
           indicator.setFraction(i++ / affectedModules.size());
-          for (VirtualFile classRoot : ModuleRootUtils.getClassRootsWithoutLibraries(module)) {
-            affected.add(Pair.pair(module, classRoot));
-          }
+          affectedClassRoots.addAll(Arrays.asList(ModuleRootUtils.getClassRootsWithoutLibraries(module)));
         }
         indicator.popState();
-        List<VirtualFile> newMetaFiles = affected.stream()
-            .map(p -> MetadataFileIndex.findMetaFileInClassRoot(p.getSecond()))
+        List<VirtualFile> newMetaFiles = affectedClassRoots.stream()
+            .map(MetadataFileIndex::findMetaFileInClassRoot)
             .filter(Objects::nonNull)
             .toList();
         if (newMetaFiles.isEmpty()) return;
@@ -99,7 +97,7 @@ class CompilationListener implements CompilationStatusListener, ProjectTaskListe
         i = 0;
         for (Module module : affectedModules) {
           indicator.setText2(module.getName());
-          indicator.setFraction(i++ / affected.size());
+          indicator.setFraction(i++ / affectedModules.size());
           refreshModuleAndDependencies(List.of(module), newMetaFiles);
         }
       }
