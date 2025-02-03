@@ -18,7 +18,7 @@ to [Semantic Versioning](https://semver.org).
 
 ### Security
 
-## 600.0.0+242 - 2025-01-30
+## 600.0.0+223 - 2025-02-03
 
 ### Added
 

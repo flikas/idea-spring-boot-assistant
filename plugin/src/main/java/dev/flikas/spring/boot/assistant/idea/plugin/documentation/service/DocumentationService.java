@@ -23,7 +23,6 @@ import javax.swing.*;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.intellij.lang.documentation.DocumentationMarkup.BOTTOM_ELEMENT;
 import static com.intellij.lang.documentation.DocumentationMarkup.CONTENT_ELEMENT;
 import static com.intellij.lang.documentation.DocumentationMarkup.DEFINITION_ELEMENT;
 import static com.intellij.lang.documentation.DocumentationMarkup.GRAYED_ELEMENT;
@@ -113,7 +112,7 @@ public final class DocumentationService {
     doc.append(body);
 
     property.getSourceField().ifPresent(field -> doc.hr().append(
-        BOTTOM_ELEMENT.child(GRAYED_ELEMENT.addText("Declared at: "))
+        CONTENT_ELEMENT.child(GRAYED_ELEMENT.addText("Declared at: "))
             .addRaw(PsiElementUtils.createLinkForDoc(field)))
     );
 
@@ -152,7 +151,7 @@ public final class DocumentationService {
         .or(group::getSourceType)
         .map(PsiElementUtils::createLinkForDoc)
         .filter(StringUtils::isNotBlank)
-        .ifPresent(link -> doc.hr().append(DocumentationMarkup.BOTTOM_ELEMENT
+        .ifPresent(link -> doc.hr().append(CONTENT_ELEMENT
             .child(DocumentationMarkup.GRAYED_ELEMENT.addText("Declared at: "))
             .addRaw(link)));
 

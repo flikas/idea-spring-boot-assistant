@@ -16,7 +16,6 @@ import org.jetbrains.yaml.psi.YAMLKeyValue;
 import org.jetbrains.yaml.psi.YamlPsiElementVisitor;
 
 public abstract class YamlInspectionBase extends LocalInspectionTool {
-  @Override
   public boolean isAvailableForFile(@NotNull PsiFile file) {
     VirtualFile virtualFile = file.getVirtualFile();
     if (virtualFile == null) {
@@ -31,6 +30,7 @@ public abstract class YamlInspectionBase extends LocalInspectionTool {
   public @NotNull PsiElementVisitor buildVisitor(
       @NotNull ProblemsHolder holder, boolean isOnTheFly, @NotNull LocalInspectionToolSession session
   ) {
+    if (!isAvailableForFile(session.getFile())) return PsiElementVisitor.EMPTY_VISITOR;
     Module module = ModuleUtil.findModuleForFile(session.getFile());
     if (module == null) return PsiElementVisitor.EMPTY_VISITOR;
 

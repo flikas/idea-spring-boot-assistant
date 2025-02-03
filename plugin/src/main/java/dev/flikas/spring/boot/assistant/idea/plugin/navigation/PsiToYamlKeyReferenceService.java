@@ -4,7 +4,6 @@ import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtil;
-import com.intellij.openapi.project.DumbModeBlockedFunctionality;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.UserDataHolderBase;
@@ -59,8 +58,6 @@ public final class PsiToYamlKeyReferenceService {
     }
     Map<String, Set<YamlKeyToNullReference>> index = refreshIndex();
     if (index == null) {
-      DumbService.getInstance(project)
-          .showDumbModeNotificationForFunctionality("Index is not ready", DumbModeBlockedFunctionality.FindUsages);
       return Collections.emptySet();
     }
     return index.getOrDefault(getCanonicalName(psiElement), Collections.emptySet());

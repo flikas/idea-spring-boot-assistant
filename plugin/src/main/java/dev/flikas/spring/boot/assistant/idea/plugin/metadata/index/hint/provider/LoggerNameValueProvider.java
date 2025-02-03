@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.intellij.openapi.project.DumbModeBlockedFunctionality.CodeCompletion;
-
 /**
  * @see ConfigurationMetadata.Hint.ValueProvider.Type#LOGGER_NAME
  */
@@ -54,7 +52,6 @@ public class LoggerNameValueProvider extends AbstractValueProvider {
     Project project = getProject(completionParameters);
     DumbService dumbService = DumbService.getInstance(project);
     if (dumbService.isDumb()) {
-      dumbService.showDumbModeNotificationForFunctionality("Completion", CodeCompletion);
       return Set.of();
     }
     enum Type {PACKAGE, CLASS, GROUP}

@@ -136,7 +136,7 @@ public class HandleAsValueProvider extends AbstractValueProvider {
       PrefixMatcher matcher = Objects.requireNonNullElse(prefixMatcher, PrefixMatcher.ALWAYS_TRUE);
       // But this is the locals that installed on the developer's computer,
       // may not suitable for he/she's application. Consider using all the ISO standard locale names?
-      return Locale.availableLocales()
+      return Arrays.stream(Locale.getAvailableLocales())
           .map(Locale::stripExtensions)
           .distinct()
           .filter(l -> StringUtils.isNotBlank(l.getLanguage()) && matcher.prefixMatches(l.toString()))

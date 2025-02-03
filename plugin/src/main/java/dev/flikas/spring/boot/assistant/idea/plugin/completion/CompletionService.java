@@ -76,10 +76,13 @@ public final class CompletionService {
     Module module = findModule(completionParameters);
     Collection<MetadataItem> candidates = findProperty(module, parentName, queryString);
     if (!candidates.isEmpty()) {
-      candidates.stream().map(metaItem -> switch (metaItem) {
-        case MetadataProperty property -> createLookupElement(parentName, property);
-        case MetadataGroup group -> createLookupElement(parentName, group);
-        default -> throw new IllegalStateException("Unexpected value: " + metaItem);
+      candidates.stream().map(metaItem -> {
+        if (Objects.requireNonNull(metaItem) instanceof MetadataProperty property) {
+          return createLookupElement(parentName, property);
+        } else if (metaItem instanceof MetadataGroup group) {
+          return createLookupElement(parentName, group);
+        }
+        throw new IllegalStateException("Unexpected value: " + metaItem);
       }).filter(Objects::nonNull).forEach(resultSet::addElement);
       return;
     }
@@ -233,31 +236,29 @@ public final class CompletionService {
 
 
   private LookupElement createLookupElement(Hint hint) {
-    LookupElement result = switch (hint.psiElement()) {
-      case PsiVariable psiVariable ->
-          new VariableLookupItem(psiVariable).setInsertHandler(YamlValueInsertHandler.INSTANCE);
-      case PsiClass psiClass -> {
-        JavaPsiClassReferenceElement li = new JavaPsiClassReferenceElement(psiClass);
-        li.setInsertHandler(YamlValueInsertHandler.INSTANCE);
-        if (StringUtils.isNotBlank(hint.value())) {
-          li.setLookupString(hint.value());
-          li.setForcedPresentableName(li.getLookupString());
-        }
-        yield li;
+    LookupElement result;
+    if (hint.psiElement() instanceof PsiVariable psiVariable) {
+      result = new VariableLookupItem(psiVariable).setInsertHandler(YamlValueInsertHandler.INSTANCE);
+    } else if (hint.psiElement() instanceof PsiClass psiClass) {
+      JavaPsiClassReferenceElement li = new JavaPsiClassReferenceElement(psiClass);
+      li.setInsertHandler(YamlValueInsertHandler.INSTANCE);
+      if (StringUtils.isNotBlank(hint.value())) {
+        li.setLookupString(hint.value());
+        li.setForcedPresentableName(li.getLookupString());
       }
-      case PsiMethod psiMethod ->
-          new JavaMethodCallElement(psiMethod).setInsertHandler(YamlValueInsertHandler.INSTANCE);
-      case null, default -> {
-        LookupElementBuilder le = ReadAction.compute(() ->
-            LookupElementBuilder.create(hint.value()).withIcon(hint.icon())
-                .withPsiElement(new SourceContainer(hint, project))
-                .withInsertHandler(YamlValueInsertHandler.INSTANCE));
-        if (StringUtils.isNotBlank(hint.oneLineDescription())) {
-          le = le.withTailText("(" + hint.oneLineDescription() + ")", true);
-        }
-        yield le;
+      result = li;
+    } else if (hint.psiElement() instanceof PsiMethod psiMethod) {
+      result = new JavaMethodCallElement(psiMethod).setInsertHandler(YamlValueInsertHandler.INSTANCE);
+    } else {
+      LookupElementBuilder le = ReadAction.compute(() ->
+          LookupElementBuilder.create(hint.value()).withIcon(hint.icon())
+              .withPsiElement(new SourceContainer(hint, project))
+              .withInsertHandler(YamlValueInsertHandler.INSTANCE));
+      if (StringUtils.isNotBlank(hint.oneLineDescription())) {
+        le = le.withTailText("(" + hint.oneLineDescription() + ")", true);
       }
-    };
+      result = le;
+    }
     if (hint.priorityGroup() != null) {
       return PrioritizedLookupElement.withGrouping(result, hint.priorityGroup());
     } else {

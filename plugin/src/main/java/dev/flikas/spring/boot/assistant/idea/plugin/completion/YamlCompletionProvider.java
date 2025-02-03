@@ -5,7 +5,6 @@ import com.intellij.codeInsight.completion.CompletionProvider;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.project.DumbModeBlockedFunctionality;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiComment;
@@ -38,8 +37,6 @@ class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
     }
     Project project = element.getProject();
     if (ReadAction.compute(() -> DumbService.isDumb(project))) {
-      DumbService.getInstance(project).showDumbModeNotificationForFunctionality("Spring configuration completion",
-          DumbModeBlockedFunctionality.CodeCompletion);
       return;
     }
     Module module = findModuleForPsiElement(element);

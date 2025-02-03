@@ -2,7 +2,6 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.markdownToHTML
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 
 /**
@@ -60,7 +59,7 @@ dependencies {
 //        bundledPlugin("com.intellij.properties")
         bundledPlugin("org.jetbrains.plugins.yaml")
 
-        testFramework(TestFrameworkType.JUnit5)
+//        testFramework(TestFrameworkType.JUnit5)
     }
 
     implementation("jakarta.validation:jakarta.validation-api:3.1.0")
