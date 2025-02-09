@@ -101,7 +101,7 @@ See [here](CHANGELOG.md).
 ## License
 
 Spring Boot Assistant - IntelliJ-based Plugin is open-sourced software licensed under
-the [MIT License](http://opensource.org/licenses/MIT).
+the [MPL LICENSE](LICENSE).
 
 ## About
 
