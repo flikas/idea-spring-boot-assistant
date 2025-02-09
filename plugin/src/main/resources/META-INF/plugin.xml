@@ -105,10 +105,8 @@
     <referencesSearch
         implementation="dev.flikas.spring.boot.assistant.idea.plugin.navigation.PsiToYamlKeySearcher"/>
 
-    <platform.backend.documentation.psiTargetProvider
-        implementation="dev.flikas.spring.boot.assistant.idea.plugin.documentation.YamlDocumentationTargetProvider"/>
-    <platform.backend.documentation.linkHandler
-        implementation="dev.flikas.spring.boot.assistant.idea.plugin.documentation.ProjectDocumentationLinkHandler"/>
+    <documentationProvider
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.documentation.YamlDocumentationProvider"/>
 
     <moduleService
         serviceInterface="dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService"
