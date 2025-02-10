@@ -1,7 +1,6 @@
 # ROADMAP
 
 - Inspection: add `spring-boot-configuration-processor`
-- Support `*.properties` files.
 - Convert between `*.properties` & `*.yaml` files.
 - Support `@PropertySource`, `@TestPropertySource` annotation.
 - Support `@Value` annotation.
@@ -10,3 +9,6 @@
 - Quick-fix for deprecated properties.
 - Comply with [Trusted Project](https://plugins.jetbrains.com/docs/intellij/trusted-projects.html), eg, while value
   validation.
+- Go to placeholders.
+- More inspection for `.properties` file.
+- Documentation for `.properties` file.

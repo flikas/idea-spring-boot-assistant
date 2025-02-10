@@ -8,7 +8,11 @@ to [Semantic Versioning](https://semver.org).
 
 ### Added
 
+- Support `application.properties` files.
+
 ### Changed
+
+- Spring Configuration YAML FileType have got a new icon.
 
 ### Deprecated
 

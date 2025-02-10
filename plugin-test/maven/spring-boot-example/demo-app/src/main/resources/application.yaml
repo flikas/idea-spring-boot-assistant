@@ -2,11 +2,12 @@
 
 # Completion test
 spring:
+  # Completion: type boolean
   devtools.add-properties: true
   jpa.hibernate:
     # Completion: hint-values
     ddl-auto: 'create-drop'
-  # Completion: enum
+  # Completion: type enum
   data.cassandra.request.throttler.type: CONCURRENCY_LIMITING
   datasource:
     # Completion: class-reference

@@ -12,7 +12,6 @@
     </Properties>
     <codeStyleSettings language="JAVA">
       <option name="BLANK_LINES_AROUND_CLASS" value="2" />
-      <option name="BLANK_LINES_AROUND_METHOD" value="2" />
       <option name="ALIGN_MULTILINE_PARENTHESIZED_EXPRESSION" value="true" />
       <option name="CALL_PARAMETERS_WRAP" value="1" />
       <option name="METHOD_PARAMETERS_WRAP" value="1" />
