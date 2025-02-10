@@ -10,3 +10,4 @@
 - Quick-fix for deprecated properties.
 - Comply with [Trusted Project](https://plugins.jetbrains.com/docs/intellij/trusted-projects.html), eg, while value
   validation.
+- Go to placeholders.

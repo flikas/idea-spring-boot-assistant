@@ -1,4 +1,4 @@
-package dev.flikas.spring.boot.assistant.idea.plugin.completion;
+package dev.flikas.spring.boot.assistant.idea.plugin.completion.yaml;
 
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
@@ -12,6 +12,7 @@ import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
+import dev.flikas.spring.boot.assistant.idea.plugin.completion.CompletionService;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -65,10 +66,12 @@ class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
              || (nearestSequenceItem != null && YAMLUtil.psiAreAtTheSameLine(nearestSequenceItem, context)))
         && context instanceof YAMLScalar) {
       // User is asking completion for property value
-      service.findSuggestionForValue(completionParameters, resultSet, ancestorKeys, queryString);
+      service.findSuggestionForValue(completionParameters, resultSet, ancestorKeys, queryString,
+          YamlValueInsertHandler.INSTANCE);
     } else {
       // Key completion
-      service.findSuggestionForKey(completionParameters, resultSet, ancestorKeys, queryString);
+      service.findSuggestionForKey(completionParameters, resultSet, ancestorKeys, queryString,
+          YamlKeyInsertHandler.INSTANCE);
     }
   }
 }

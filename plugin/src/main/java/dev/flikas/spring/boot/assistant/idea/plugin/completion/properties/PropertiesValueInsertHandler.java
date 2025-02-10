@@ -1,15 +1,23 @@
-package dev.flikas.spring.boot.assistant.idea.plugin.completion;
+package dev.flikas.spring.boot.assistant.idea.plugin.completion.properties;
 
 import com.intellij.codeInsight.completion.InsertHandler;
 import com.intellij.codeInsight.completion.InsertionContext;
 import com.intellij.codeInsight.lookup.LookupElement;
+import com.intellij.lang.properties.psi.PropertiesResourceBundleUtil;
+import com.intellij.lang.properties.psi.Property;
+import com.intellij.lang.properties.psi.PropertyKeyValueFormat;
+import com.intellij.lang.properties.psi.codeStyle.PropertiesCodeStyleSettings;
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.text.CharArrayUtil;
+import net.jcip.annotations.ThreadSafe;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-// a large section of this class is borrowed from https://github.com/zalando/intellij-swagger
-public class YamlValueInsertHandler implements InsertHandler<LookupElement> {
-  public static final YamlValueInsertHandler INSTANCE = new YamlValueInsertHandler();
+@ThreadSafe
+class PropertiesValueInsertHandler implements InsertHandler<LookupElement> {
+  public static final PropertiesValueInsertHandler INSTANCE = new PropertiesValueInsertHandler();
 
   private static final char SINGLE_QUOTE = '\'';
   private static final char DOUBLE_QUOTE = '"';
@@ -19,7 +27,7 @@ public class YamlValueInsertHandler implements InsertHandler<LookupElement> {
           '`'};
 
 
-  private YamlValueInsertHandler() {}
+  private PropertiesValueInsertHandler() {}
 
 
   public static String unescapeValue(String value) {
@@ -28,19 +36,23 @@ public class YamlValueInsertHandler implements InsertHandler<LookupElement> {
 
 
   @Override
-  public void handleInsert(@NotNull InsertionContext insertionContext, @NotNull LookupElement lookupElement) {
-    if (shouldUseQuotes(lookupElement)) {
-      final boolean hasDoubleQuotes =
-          hasStartingOrEndingQuoteOfType(insertionContext, lookupElement, DOUBLE_QUOTE);
+  public void handleInsert(@NotNull InsertionContext context, @NotNull LookupElement lookupElement) {
+    Project project = context.getProject();
+    PsiElement currentElement = context.getFile().findElementAt(context.getStartOffset());
+    assert currentElement != null : "no element at " + context.getStartOffset();
+    Property property = PsiTreeUtil.getParentOfType(currentElement, Property.class);
+    if (property == null) return;
 
-      if (hasDoubleQuotes) {
-        handleEndingQuote(insertionContext, DOUBLE_QUOTE);
-        handleStartingQuote(insertionContext, lookupElement, DOUBLE_QUOTE);
-      } else {
-        handleEndingQuote(insertionContext, SINGLE_QUOTE);
-        handleStartingQuote(insertionContext, lookupElement, SINGLE_QUOTE);
-      }
-    }
+    String escaped = escapeValue(project, lookupElement.getLookupString());
+    if (escaped.equals(lookupElement.getLookupString())) return;
+
+    property.setValue(lookupElement.getLookupString(), PropertyKeyValueFormat.MEMORY);
+  }
+
+
+  private String escapeValue(Project project, String value) {
+    char delimiter = PropertiesCodeStyleSettings.getInstance(project).getDelimiter();
+    return PropertiesResourceBundleUtil.convertValueToFileFormat(value, delimiter, PropertyKeyValueFormat.MEMORY);
   }
 
 

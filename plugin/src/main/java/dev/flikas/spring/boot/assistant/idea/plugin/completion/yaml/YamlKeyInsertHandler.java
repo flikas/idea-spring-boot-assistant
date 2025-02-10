@@ -1,4 +1,4 @@
-package dev.flikas.spring.boot.assistant.idea.plugin.completion;
+package dev.flikas.spring.boot.assistant.idea.plugin.completion.yaml;
 
 import com.intellij.codeInsight.AutoPopupController;
 import com.intellij.codeInsight.completion.InsertHandler;
@@ -15,12 +15,14 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.DocumentUtil;
+import dev.flikas.spring.boot.assistant.idea.plugin.completion.SourceContainer;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataGroup;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataItem;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.ConfigurationPropertyName.Form;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyName;
 import dev.flikas.spring.boot.assistant.idea.plugin.misc.PsiTypeUtils;
+import net.jcip.annotations.ThreadSafe;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.yaml.YAMLElementGenerator;
@@ -37,7 +39,8 @@ import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.getIndent;
 import static in.oneton.idea.spring.assistant.plugin.misc.GenericUtil.getOverallIndent;
 import static java.util.Objects.requireNonNull;
 
-public class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
+@ThreadSafe
+class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
   public static final YamlKeyInsertHandler INSTANCE = new YamlKeyInsertHandler();
   private static final String CARET = "<caret>";
 
@@ -48,6 +51,7 @@ public class YamlKeyInsertHandler implements InsertHandler<LookupElement> {
   @Override
   public void handleInsert(final @NotNull InsertionContext context, final @NotNull LookupElement lookupElement) {
     if (nextCharAfterSpacesAndQuotesIsColon(getStringAfterAutoCompletedValue(context))) {
+      //TODO Why this?
       return;
     }
     String existingIndentation = getExistingIndentation(context, lookupElement);
