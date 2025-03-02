@@ -1,6 +1,7 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.filetype;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.lang.properties.PropertiesLanguage;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import dev.flikas.spring.boot.assistant.idea.plugin.misc.CompositeIconUtils;
 import icons.Icons;
@@ -8,45 +9,44 @@ import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.yaml.YAMLLanguage;
 
 import javax.swing.*;
 
-public class SpringBootConfigurationYamlFileType extends LanguageFileType {
-  public static final SpringBootConfigurationYamlFileType INSTANCE = new SpringBootConfigurationYamlFileType();
+public class SpringBootConfigurationPropertiesFileType extends LanguageFileType {
+  public static final SpringBootConfigurationPropertiesFileType INSTANCE = new SpringBootConfigurationPropertiesFileType();
 
 
-  private SpringBootConfigurationYamlFileType() {
-    super(YAMLLanguage.INSTANCE, true);
+  private SpringBootConfigurationPropertiesFileType() {
+    super(PropertiesLanguage.INSTANCE, true);
   }
 
 
   @Override
   public @NonNls @NotNull String getName() {
-    return "spring-boot-properties-yaml";
+    return "sba-spring-boot-configuration-properties";
   }
 
 
   @Override
   public @Nls @NotNull String getDisplayName() {
-    return "Spring Boot Configuration YAML";
+    return "Spring Boot Configuration Properties";
   }
 
 
   @Override
   public @NotNull String getDescription() {
-    return "Spring configuration yaml file";
+    return "Spring Boot configuration properties file";
   }
 
 
   @Override
   public @NotNull String getDefaultExtension() {
-    return "yaml";
+    return "properties";
   }
 
 
   @Override
   public @Nullable Icon getIcon() {
-    return CompositeIconUtils.createWithModifier(Icons.SpringBoot, AllIcons.FileTypes.Yaml);
+    return CompositeIconUtils.createWithModifier(Icons.SpringBoot, AllIcons.FileTypes.Properties);
   }
 }

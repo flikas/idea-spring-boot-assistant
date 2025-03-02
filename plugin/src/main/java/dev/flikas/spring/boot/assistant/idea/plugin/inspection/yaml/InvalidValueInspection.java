@@ -1,4 +1,4 @@
-package dev.flikas.spring.boot.assistant.idea.plugin.inspection;
+package dev.flikas.spring.boot.assistant.idea.plugin.inspection.yaml;
 
 import com.intellij.codeInspection.ProblemsHolder;
 import com.intellij.openapi.diagnostic.Logger;

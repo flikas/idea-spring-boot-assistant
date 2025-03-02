@@ -9,15 +9,15 @@ Spring Boot Assistant - IntelliJ-based plugin that assists you in developing spr
 
 This plugin adds support for
 [Spring Boot external-config files](https://docs.spring.io/spring-boot/reference/features/external-config.html#features.external-config.files)
-(application.yaml, etc.).
+(application.yaml/properties, etc.).
 
 ### Features:
 
 - Completion
-    - Auto-completion of the configuration properties in your `application.yaml` files based on the spring boot's
-      autoconfiguration jars are present in the classpath.
-    - Auto-completion of the configuration properties in your `application.yaml` files if you have classes annotated
-      with `@ConfigurationProperties`,
+    - Auto-completion of the configuration properties in your `application.yaml/properties` files based on the spring
+      boot's autoconfiguration jars are present in the classpath.
+    - Auto-completion of the configuration properties in your `application.yaml/properties` files if you have classes
+      annotated with `@ConfigurationProperties`,
       [if your build is properly configured](https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html#configuration-metadata.annotation-processor).
     - Short form search & search for element deep within is also supported. i.e, `sp.d` will show you `spring.data`,
       `spring.datasource`, also, `port` would show `server.port` as a suggestion.
@@ -31,8 +31,9 @@ This plugin adds support for
     - Property deprecated: Report problem if using a deprecated property.
     - Invalid value: Report problem if the value does not match the property type.
 - Navigation
-    - Support for IDE feature `Go to Declaration or Usages (Ctrl+B)` in `application.yaml` files.
+    - Support for IDE feature `Go to Declaration or Usages (Ctrl+B)` in `application.yaml/properties` files.
 - Editing
+    - Add line separator in yaml key (press Enter), will split yaml key in proper format.
     - Enhanced `Join Lines (Ctrl+Shift+J/⌃ ⇧ J)` command, which join yaml keys in proper format.
 
 ### Bug report:
@@ -61,7 +62,7 @@ To install the plugin open your editor (IntelliJ) and hit:
 ## Usage
 
 Assuming that you have Spring boot's autoconfiguration jars are present in the classpath, this plugin will automatically
-allow you to autocomplete properties as suggestions in your `application.yaml` files
+allow you to autocomplete properties as suggestions in your `application.yaml/properties` files
 
 Suggestions would appear as soon as you type/press `CTRL+SPACE`.
 
@@ -76,8 +77,7 @@ the [Spring Boot Document](https://docs.spring.io/spring-boot/docs/current/refer
 for your project/module.
 
 > If you want to look at a sample project, look inside [plugin-test](plugin-test/) directory where the above setup is
-> done.
-> These samples allow properties from `@ConfigurationProperties` to be shown as suggestions
+> done. These samples allow properties from `@ConfigurationProperties` to be shown as suggestions
 
 **IMPORTANT**
 

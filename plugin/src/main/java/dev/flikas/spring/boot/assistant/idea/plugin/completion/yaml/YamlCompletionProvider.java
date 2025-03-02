@@ -1,4 +1,4 @@
-package dev.flikas.spring.boot.assistant.idea.plugin.completion;
+package dev.flikas.spring.boot.assistant.idea.plugin.completion.yaml;
 
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionProvider;
@@ -12,6 +12,7 @@ import com.intellij.psi.PsiComment;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ProcessingContext;
+import dev.flikas.spring.boot.assistant.idea.plugin.completion.CompletionService;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +22,6 @@ import org.jetbrains.yaml.psi.YAMLPsiElement;
 import org.jetbrains.yaml.psi.YAMLScalar;
 import org.jetbrains.yaml.psi.YAMLSequenceItem;
 
-import static com.intellij.codeInsight.completion.CompletionUtil.DUMMY_IDENTIFIER;
 import static com.intellij.codeInsight.completion.CompletionUtil.DUMMY_IDENTIFIER_TRIMMED;
 import static com.intellij.openapi.module.ModuleUtilCore.findModuleForPsiElement;
 
@@ -56,8 +56,9 @@ class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
     String ancestorKeys = YAMLUtil.getConfigFullName(context);
 
     ancestorKeys = StringUtils.removeEnd(ancestorKeys, queryString);
-    queryString = StringUtils.remove(queryString, DUMMY_IDENTIFIER);
-    queryString = StringUtils.removeEnd(queryString, DUMMY_IDENTIFIER_TRIMMED);
+    // use chars before the completion point as query string, ignore the remains,
+    // besides, if user press Tab for completion, we should delete thr remains chars.
+    queryString = StringUtils.truncate(queryString, queryString.indexOf(DUMMY_IDENTIFIER_TRIMMED));
     CompletionService service = CompletionService.getInstance(project);
     YAMLKeyValue nearestKeyValue = PsiTreeUtil.getParentOfType(context, YAMLKeyValue.class, false);
     YAMLSequenceItem nearestSequenceItem = PsiTreeUtil.getParentOfType(context, YAMLSequenceItem.class, false);
@@ -65,10 +66,12 @@ class YamlCompletionProvider extends CompletionProvider<CompletionParameters> {
              || (nearestSequenceItem != null && YAMLUtil.psiAreAtTheSameLine(nearestSequenceItem, context)))
         && context instanceof YAMLScalar) {
       // User is asking completion for property value
-      service.findSuggestionForValue(completionParameters, resultSet, ancestorKeys, queryString);
+      service.findSuggestionForValue(completionParameters, resultSet, ancestorKeys, queryString,
+          YamlValueInsertHandler.INSTANCE);
     } else {
       // Key completion
-      service.findSuggestionForKey(completionParameters, resultSet, ancestorKeys, queryString);
+      service.findSuggestionForKey(completionParameters, resultSet, ancestorKeys, queryString,
+          YamlKeyInsertHandler.INSTANCE);
     }
   }
 }
