@@ -1,9 +1,7 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.filetype;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.lang.properties.PropertiesLanguage;
 import com.intellij.openapi.fileTypes.LanguageFileType;
-import dev.flikas.spring.boot.assistant.idea.plugin.misc.CompositeIconUtils;
 import icons.Icons;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NonNls;
@@ -47,6 +45,6 @@ public class SpringBootConfigurationPropertiesFileType extends LanguageFileType 
 
   @Override
   public @Nullable Icon getIcon() {
-    return CompositeIconUtils.createWithModifier(Icons.SpringBoot, AllIcons.FileTypes.Properties);
+    return Icons.Properties;
   }
 }

@@ -1,7 +1,6 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.misc;
 
 import com.intellij.ui.IconManager;
-import com.intellij.ui.IconReplacer;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.OffsetIcon;
 import com.intellij.ui.RetrievableIcon;
@@ -104,10 +103,11 @@ public interface CompositeIconUtils {
       return (int) ceil(scaleVal(myHeight, OBJ_SCALE) * (1 + factor));
     }
 
-    @Override
-    public @NotNull Icon replaceBy(@NotNull IconReplacer replacer) {
-      return new ModifierIcon(replacer.replaceIcon(myIcon));
-    }
+//    FIXME: incompatible upgrade on IconReplacer from JBR 241+
+//    @Override
+//    public @NotNull Icon replaceBy(@NotNull IconReplacer replacer) {
+//      return new ModifierIcon(replacer.replaceIcon(myIcon));
+//    }
 
     private void updateSize() {
       myWidth = myIcon.getIconWidth();

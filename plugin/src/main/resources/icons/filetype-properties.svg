@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+		version="1.1"
+		id="Layer_1"
+		x="0px"
+		y="0px"
+		width="16"
+		height="16"
+		viewBox="0 0 510 457.8"
+		style="enable-background:new 0 0 510 457.8;"
+		xml:space="preserve"
+		sodipodi:docname="filetype-properties.svg"
+		inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+		xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+		xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+		xmlns="http://www.w3.org/2000/svg"
+><defs
+   id="defs1"><clipPath
+     clipPathUnits="userSpaceOnUse"
+     id="clipPath10"><g
+       inkscape:label="Clip"
+       id="use10"><g
+         inkscape:groupmode="layer"
+         id="g12"
+         inkscape:label="properties"
+         style="display:inline"><polygon
+           fill="#62b543"
+           points="16,16 16,7 14,7 14,16 "
+           id="polygon10"
+           style="display:inline;stroke:#ffffff;stroke-width:1;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+           transform="matrix(31.875,0,0,31.875,-0.52469151,-25.575309)" /><polygon
+    fill="#f4af3d"
+    points="13,16 13,9 11,9 11,16 "
+    id="polygon11"
+    style="display:inline;stroke:#ffffff;stroke-width:1;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+    transform="matrix(31.875,0,0,31.875,-0.52469151,-25.575309)"/><polygon
+    fill="#f26522"
+    points="10,16 10,11 8,11 8,16 "
+    id="polygon12"
+    style="display:inline;stroke:#ffffff;stroke-width:1;stroke-dasharray:none;stroke-opacity:1;paint-order:markers stroke fill"
+    transform="matrix(31.875,0,0,31.875,-0.52469151,-25.575309)"/></g></g></clipPath></defs>
+  <sodipodi:namedview
+      id="namedview1"
+      pagecolor="#ffffff"
+      bordercolor="#000000"
+      borderopacity="0.25"
+      inkscape:showpageshadow="2"
+      inkscape:pageopacity="0.0"
+      inkscape:pagecheckerboard="0"
+      inkscape:deskcolor="#d1d1d1"
+      inkscape:zoom="30.375"
+      inkscape:cx="8.0164609"
+      inkscape:cy="8"
+      inkscape:window-width="1280"
+      inkscape:window-height="730"
+      inkscape:window-x="-6"
+      inkscape:window-y="-6"
+      inkscape:window-maximized="1"
+      inkscape:current-layer="Layer_1"/>
+  <style
+      type="text/css"
+      id="style1">
+	.st0{fill:#6DB33F;}
+</style>
+  <title
+      id="title1">icon-spring-boot</title>
+
+  <path
+      d="m 154.51904,-0.01479492 c -17.4017,0 -38.86262,12.41708992 -47.56347,27.51708992 L 6.5368652,201.38291 c -8.7008517,15.1 -8.7008517,39.80967 0,54.90967 L 106.95557,430.29771 c 8.70085,15.1 30.06176,27.51708 47.56347,27.51708 h 84.04541 v -98.36425 c -70.19268,-7.69173 -125.00976,-67.31649 -125.00976,-139.51538 0.10001,-44.4 21.1116,-86.14537 56.71509,-112.74537 8.2008,-6.1 19.67332,-4.40239 25.77392,3.79761 6.1006,8.2 4.4032,19.73618 -3.79761,25.83618 -45.90449,34.1 -55.51935,98.96939 -21.41601,144.86939 16.98375,22.85859 41.61872,36.7102 67.73437,40.65307 v -13.26049 h 68.23243 c 3.04751,-1.811 6.05727,-3.81669 8.96484,-5.97657 6.9256,-5.13445 13.08871,-11.07933 18.42773,-17.6184 v -40.15503 h 20.1709 c 2.07326,-8.22077 3.17505,-16.73675 3.17505,-25.40039 -0.10001,-32.9 -15.70688,-63.82286 -42.20947,-83.42286 -8.20081,-6 -9.86045,-17.63618 -3.85987,-25.83618 3.75037,-5.125 9.69791,-7.65454 15.62623,-7.40844 3.55698,0.14765 7.0724,1.29858 10.1477,3.54858 35.90351,26.5 57.05087,68.5189 57.15088,113.1189 0,8.68493 -0.85084,17.15042 -2.36572,25.40039 h 37.7893 v -63.75 h 62.19361 L 402.98218,27.502295 c -8.70085,-15.1 -30.12402,-27.51708992 -47.62573,-27.51708992 z M 253.94165,75.501563 c 11.40112,0 20.7312,9.331201 20.7312,20.731201 V 219.93516 c 0,11.4 -9.33008,20.66894 -20.7312,20.66894 -11.40112,0 -20.66894,-9.26894 -20.66894,-20.66894 V 96.232764 c 0,-11.4 9.26782,-20.731201 20.66894,-20.731201 z"
+      style="baseline-shift:baseline;display:inline;overflow:visible;vector-effect:none;fill:#6db33f;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
+      id="path34"/>
+  <path
+      d="m 445.75195,197.52305 v 286.875 h 63.75 v -286.875 z"
+      style="baseline-shift:baseline;display:inline;overflow:visible;vector-effect:none;fill:#62b543;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
+      id="path32"/>
+  <path
+      d="m 350.12695,261.27305 v 223.125 h 63.75 v -223.125 z"
+      style="baseline-shift:baseline;display:inline;overflow:visible;vector-effect:none;fill:#f4af3d;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
+      id="path30"/>
+  <path
+      d="m 254.50195,325.02305 v 159.375 h 63.75 v -159.375 z"
+      style="baseline-shift:baseline;display:inline;overflow:visible;vector-effect:none;fill:#f26522;enable-background:accumulate;stop-color:#000000;stop-opacity:1"
+      id="path28"/></svg>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 24.0.3, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+		version="1.1"
+		id="Layer_1"
+		x="0px"
+		y="0px"
+		width="16"
+		height="16"
+		viewBox="0 0 510 457.8"
+		style="enable-background:new 0 0 510 457.8;"
+		xml:space="preserve"
+		sodipodi:docname="filetype-yaml.svg"
+		inkscape:version="1.4 (86a8ad7, 2024-10-11)"
+		xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+		xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+		xmlns="http://www.w3.org/2000/svg"
+><defs
+   id="defs1" />
+  <sodipodi:namedview
+      id="namedview1"
+      pagecolor="#ffffff"
+      bordercolor="#000000"
+      borderopacity="0.25"
+      inkscape:showpageshadow="2"
+      inkscape:pageopacity="0.0"
+      inkscape:pagecheckerboard="0"
+      inkscape:deskcolor="#d1d1d1"
+      inkscape:zoom="1"
+      inkscape:cx="8.5"
+      inkscape:cy="8"
+      inkscape:window-width="1280"
+      inkscape:window-height="730"
+      inkscape:window-x="-6"
+      inkscape:window-y="-6"
+      inkscape:window-maximized="1"
+      inkscape:current-layer="Layer_1"/>
+  <style
+      type="text/css"
+      id="style1">
+	.st0{fill:#6DB33F;}
+</style>
+  <title
+      id="title1">icon-spring-boot</title>
+  <g
+      id="Layer_2_1_"
+      transform="matrix(1.000098,0,0,1,-0.07500735,0.005625)">
+	<g
+      id="Layer_1-2">
+		<path
+        class="st0"
+        d="M 503.5,201.4 403,27.5 C 394.3,12.4 372.9,0 355.4,0 H 154.6 C 137.2,0 115.7,12.4 107,27.5 L 6.6,201.4 c -8.7,15.1 -8.7,39.8 0,54.9 l 100.4,174 c 8.7,15.1 30.1,27.5 47.6,27.5 h 200.9 c 17.4,0 38.8,-12.4 47.6,-27.5 l 100.4,-174 c 8.7,-15.1 8.7,-39.8 0,-54.9 z M 233.3,96.2 c 0,-11.4 9.3,-20.7 20.7,-20.7 11.4,0 20.7,9.3 20.7,20.7 v 123.7 c 0,11.4 -9.3,20.7 -20.7,20.7 -11.4,0 -20.7,-9.3 -20.7,-20.7 v 0 z M 254,360.3 c -77.4,0 -140.4,-63 -140.4,-140.4 0.1,-44.4 21.1,-86.1 56.7,-112.7 8.2,-6.1 19.7,-4.4 25.8,3.8 6.1,8.2 4.4,19.7 -3.8,25.8 v 0 c -45.9,34.1 -55.5,99 -21.4,144.9 34.1,45.9 99,55.5 144.9,21.4 26.3,-19.5 41.8,-50.4 41.8,-83.2 -0.1,-32.9 -15.7,-63.8 -42.2,-83.4 -8.2,-6 -9.9,-17.6 -3.9,-25.8 6,-8.2 17.6,-9.9 25.8,-3.9 35.9,26.5 57,68.5 57.1,113.1 0,77.5 -63,140.4 -140.4,140.4 z"
+        id="path1"/>
+	</g>
+</g>
+  <g
+      fill="none"
+      fill-rule="evenodd"
+      id="g6"
+      transform="matrix(31.875,0,0,31.875,-1.0493827,-26.62469)"><polygon
+     fill="#f98b9e"
+     fill-opacity="0.7"
+     points="1,16 16,16 16,9 1,9 "
+     id="polygon1"
+     style="fill:#f98b9e;fill-opacity:1" />
+    <polygon
+        fill="#231f20"
+        fill-opacity="0.7"
+        points="3,5 1.996,5 1.996,3.029 0,0 1.05,0 2.496,2.207 3.95,0 5,0 3,3.007 "
+        transform="translate(1,10)"
+        id="polygon4"/>
+    <polygon
+        fill="#231f20"
+        fill-opacity="0.7"
+        points="2.5,3.5 1,1.7 1,5 0,5 0,0 0.936,0 2.5,2 3.979,0 5,0 5,5 4,5 4,1.7 "
+        transform="translate(6,10)"
+        id="polygon5"/>
+    <polygon
+        fill="#231f20"
+        fill-opacity="0.7"
+        points="1,4 3.5,4 3.5,5 0,5 0,0 1,0 "
+        transform="translate(12,10)"
+        id="polygon6"/></g></svg>
