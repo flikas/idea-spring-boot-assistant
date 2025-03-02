@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 abstract class AbstractReferenceProvider extends PsiReferenceProvider {
   @Override
   @NotNull
-  public PsiReference @NotNull [] getReferencesByElement(
+  public PsiReference[] getReferencesByElement(
       @NotNull PsiElement element, @NotNull ProcessingContext context) {
     PsiElement source = getRefSource(element, context);
     if (source != null) {
@@ -24,7 +24,7 @@ abstract class AbstractReferenceProvider extends PsiReferenceProvider {
   }
 
   @Override
-  public boolean acceptsHints(@NotNull PsiElement element, PsiReferenceService.@NotNull Hints hints) {
+  public boolean acceptsHints(@NotNull PsiElement element, @NotNull PsiReferenceService.Hints hints) {
 //    if (hints == PsiReferenceService.Hints.HIGHLIGHTED_REFERENCES) return false;
     return super.acceptsHints(element, hints);
   }

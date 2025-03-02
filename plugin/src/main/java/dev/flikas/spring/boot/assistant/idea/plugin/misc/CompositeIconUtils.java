@@ -1,10 +1,10 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.misc;
 
 import com.intellij.ui.IconManager;
+import com.intellij.ui.IconReplacer;
 import com.intellij.ui.JBColor;
 import com.intellij.ui.OffsetIcon;
 import com.intellij.ui.RetrievableIcon;
-import com.intellij.ui.icons.IconReplacer;
 import com.intellij.util.IconUtil;
 import com.intellij.util.ui.ColorIcon;
 import com.intellij.util.ui.JBCachingScalableIcon;
