@@ -62,19 +62,22 @@ To install the plugin open your editor (IntelliJ) and hit:
 ## Usage
 
 Assuming that you have Spring boot's autoconfiguration jars are present in the classpath, this plugin will automatically
-allow you to autocomplete properties as suggestions in your `application.yaml/properties` files
+allow you to autocomplete properties as suggestions in your `application.yaml/properties` files.
 
-Suggestions would appear as soon as you type/press `CTRL+SPACE`.
+Suggestions would appear as soon as you type or press `CTRL+SPACE`.
 
 Short form suggestions are also supported such as, `sp.d` will show you `spring.data`, `spring.datasource`, e.t.c as
 suggestions that make your typing faster.
 
 In addition to libraries in the classpath, the plugin also allows you to have your own `@ConfigurationProperties`
-available as suggestions in your `application.yaml` files.
+available as suggestions in your `application.yaml/properties` files.
 
 For this to work, please follow
 the [Spring Boot Document](https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html#configuration-metadata.annotation-processor)
 for your project/module.
+
+> If the user need completion on any other files, right-click the file in the Project View, then 'Override File Type' to
+> 'Spring Boot Configuration YAML/Properties'.
 
 > If you want to look at a sample project, look inside [plugin-test](plugin-test/) directory where the above setup is
 > done. These samples allow properties from `@ConfigurationProperties` to be shown as suggestions

@@ -8,11 +8,7 @@ to [Semantic Versioning](https://semver.org).
 
 ### Added
 
-- Support `application.properties` files.
-
 ### Changed
-
-- Spring Configuration YAML FileType have got a new icon.
 
 ### Deprecated
 
@@ -21,6 +17,16 @@ to [Semantic Versioning](https://semver.org).
 ### Fixed
 
 ### Security
+
+## 601.0.0+242 - 2025-03-02
+
+### Added
+
+- Support `application.properties` files.
+
+### Changed
+
+- `Spring Configuration YAML File` have got a new icon.
 
 ## 600.0.0+242 - 2025-01-30
 
