@@ -56,7 +56,7 @@ dependencies {
         create(properties("platform.type"), properties("platform.version"))
 
         bundledPlugin("com.intellij.java")
-//        bundledPlugin("com.intellij.properties")
+        bundledPlugin("com.intellij.properties")
         bundledPlugin("org.jetbrains.plugins.yaml")
 
 //        testFramework(TestFrameworkType.JUnit5)

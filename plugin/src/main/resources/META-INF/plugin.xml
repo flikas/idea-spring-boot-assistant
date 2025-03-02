@@ -54,7 +54,7 @@
   <depends>com.intellij.modules.java</depends>
   <depends>com.intellij.modules.lang</depends>
   <depends>org.jetbrains.plugins.yaml</depends>
-  <!--  <depends>com.intellij.properties</depends>-->
+  <depends>com.intellij.properties</depends>
 
   <!-- Optional dependency on another plugin.
        If the plugin with the "com.MySecondPlugin" ID is installed, the contents of mysecondplugin.xml
@@ -86,38 +86,36 @@
        "implementation" class specifies the name of the class
        added to the extension point. -->
   <extensions defaultExtensionNs="com.intellij">
+    <!-- region metadata -->
     <!--suppress PluginXmlValidity -->
     <indexedRootsProvider
         implementation="dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.MetadataFileIndexConfigurator"/>
     <fileBasedIndex
         implementation="dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.MetadataFileIndex"/>
-    <completion.contributor
-        language="yaml"
-        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.completion.YamlCompletionContributor"/>
-    <fileType name="spring-boot-properties-yaml"
-              implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.filetype.SpringBootConfigurationYamlFileType"
-              fieldName="INSTANCE"
-              fileNames="application.yml;application.yaml"
-              patterns="application-*.yaml;application-*.yml;bootstrap.yml;bootstrap-*.yml;bootstrap.yaml;bootstrap-*.yaml"/>
-    <psi.referenceContributor
-        language="yaml"
-        implementation="dev.flikas.spring.boot.assistant.idea.plugin.navigation.YamlReferenceContributor"/>
-    <referencesSearch
-        implementation="dev.flikas.spring.boot.assistant.idea.plugin.navigation.PsiToYamlKeySearcher"/>
-
-    <documentationProvider
-        implementation="dev.flikas.spring.boot.assistant.idea.plugin.documentation.YamlDocumentationProvider"/>
-
     <moduleService
         serviceInterface="dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService"
         serviceImplementation="dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataServiceImpl"/>
-
-    <errorHandler implementation="dev.flikas.spring.boot.assistant.idea.plugin.report.GitHubReporter"/>
-
+    <!-- endregion metadata -->
+    <!-- region yaml -->
+    <completion.contributor
+        language="yaml"
+        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.completion.yaml.SpringYamlCompletionContributor"/>
+    <fileType name="spring-boot-properties-yaml"
+              implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.filetype.SpringBootConfigurationYamlFileType"
+              fieldName="INSTANCE"
+              fileNames="application.yml;application.yaml;bootstrap.yml;bootstrap.yaml"
+              patterns="application-*.yaml;application-*.yml;bootstrap-*.yml;bootstrap-*.yaml"/>
+    <fileType name="sba-spring-boot-configuration-properties"
+              implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.filetype.SpringBootConfigurationPropertiesFileType"
+              fieldName="INSTANCE"
+              fileNames="application.properties;bootstrap.properties"
+              patterns="application-*.properties;bootstrap-*.properties"/>
+    <psi.referenceContributor
+        language="yaml"
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.navigation.forward.YamlToCodeReferenceContributor"/>
     <joinLinesHandler implementation="dev.flikas.spring.boot.assistant.idea.plugin.editing.YamlJoinLinesHandler"/>
     <enterHandlerDelegate
         implementation="dev.flikas.spring.boot.assistant.idea.plugin.editing.YamlSplitKeyProcessor"/>
-
     <localInspection
         language="yaml"
         groupPath="Spring boot"
@@ -127,7 +125,7 @@
         level="WARNING"
         editorAttributes="WRONG_REFERENCES_ATTRIBUTES"
         suppressId="undefined"
-        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.KeyNotDefinedInspection"
+        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.yaml.KeyNotDefinedInspection"
     />
     <localInspection
         language="yaml"
@@ -137,7 +135,7 @@
         enabledByDefault="true"
         level="WARNING"
         suppressId="invalidValue"
-        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.InvalidValueInspection"/>
+        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.yaml.InvalidValueInspection"/>
     <localInspection
         language="yaml"
         groupPath="Spring boot"
@@ -146,7 +144,7 @@
         enabledByDefault="true"
         level="WARNING"
         editorAttributes="MARKED_FOR_REMOVAL_ATTRIBUTES"
-        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.PropertyRemovedInspection"/>
+        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.yaml.PropertyRemovedInspection"/>
     <localInspection
         language="yaml"
         groupPath="Spring boot"
@@ -155,7 +153,26 @@
         enabledByDefault="true"
         level="WARNING"
         editorAttributes="DEPRECATED_ATTRIBUTES"
-        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.PropertyDeprecatedInspection"/>
-  </extensions>
+        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.inspection.yaml.PropertyDeprecatedInspection"/>
+    <!-- endregion yaml -->
+    <!-- region properties -->
+    <completion.contributor
+        language="Properties"
+        implementationClass="dev.flikas.spring.boot.assistant.idea.plugin.completion.properties.SpringPropertiesCompletionContributor"/>
+    <properties.implicitPropertyUsageProvider
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.inspection.properties.PropertiesPropertyUsageProvider"/>
+    <psi.referenceContributor
+        language="Properties"
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.navigation.forward.PropertiesToCodeReferenceContributor"/>
+    <!-- endregion properties -->
+    <referencesSearch
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.navigation.backward.PsiToSpringPropertyReferenceSearcher"/>
+    <documentationProvider
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.documentation.YamlDocumentationProvider"/>
+    <readWriteAccessDetector
+        order="first, before java"
+        implementation="dev.flikas.spring.boot.assistant.idea.plugin.navigation.SpringPropertyReadWriteAccessDetector"/>
 
+    <errorHandler implementation="dev.flikas.spring.boot.assistant.idea.plugin.report.GitHubReporter"/>
+  </extensions>
 </idea-plugin>

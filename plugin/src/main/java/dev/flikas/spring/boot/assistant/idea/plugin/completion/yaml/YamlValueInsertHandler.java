@@ -1,14 +1,16 @@
-package dev.flikas.spring.boot.assistant.idea.plugin.completion;
+package dev.flikas.spring.boot.assistant.idea.plugin.completion.yaml;
 
 import com.intellij.codeInsight.completion.InsertHandler;
 import com.intellij.codeInsight.completion.InsertionContext;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.util.text.CharArrayUtil;
+import net.jcip.annotations.ThreadSafe;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 // a large section of this class is borrowed from https://github.com/zalando/intellij-swagger
-public class YamlValueInsertHandler implements InsertHandler<LookupElement> {
+@ThreadSafe
+class YamlValueInsertHandler implements InsertHandler<LookupElement> {
   public static final YamlValueInsertHandler INSTANCE = new YamlValueInsertHandler();
 
   private static final char SINGLE_QUOTE = '\'';

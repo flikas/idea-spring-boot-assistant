@@ -1,4 +1,4 @@
-package dev.flikas.spring.boot.assistant.idea.plugin.completion;
+package dev.flikas.spring.boot.assistant.idea.plugin.completion.yaml;
 
 import com.intellij.codeInsight.completion.CompletionContributor;
 import com.intellij.codeInsight.completion.CompletionType;
@@ -8,8 +8,8 @@ import org.jetbrains.yaml.YAMLLanguage;
 
 import static com.intellij.patterns.PlatformPatterns.virtualFile;
 
-public class YamlCompletionContributor extends CompletionContributor {
-  public YamlCompletionContributor() {
+public class SpringYamlCompletionContributor extends CompletionContributor {
+  public SpringYamlCompletionContributor() {
     extend(
         CompletionType.BASIC,
         PlatformPatterns.psiElement().withLanguage(YAMLLanguage.INSTANCE)

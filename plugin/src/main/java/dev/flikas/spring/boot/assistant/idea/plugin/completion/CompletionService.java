@@ -2,6 +2,7 @@ package dev.flikas.spring.boot.assistant.idea.plugin.completion;
 
 import com.intellij.codeInsight.completion.CompletionParameters;
 import com.intellij.codeInsight.completion.CompletionResultSet;
+import com.intellij.codeInsight.completion.InsertHandler;
 import com.intellij.codeInsight.completion.JavaMethodCallElement;
 import com.intellij.codeInsight.completion.JavaPsiClassReferenceElement;
 import com.intellij.codeInsight.completion.PrefixMatcher;
@@ -9,6 +10,7 @@ import com.intellij.codeInsight.completion.PrioritizedLookupElement;
 import com.intellij.codeInsight.completion.impl.CamelHumpMatcher;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
+import com.intellij.codeInsight.lookup.LookupElementDecorator;
 import com.intellij.codeInsight.lookup.VariableLookupItem;
 import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.components.Service;
@@ -68,29 +70,38 @@ public final class CompletionService {
    *
    * @param parentName  The context property name for querying, must be existed, such as 'spring.security', can be null or empty
    * @param queryString The user input for completion.
+   * @return true if some suggestions have been added to the resultSet.
    */
-  public void findSuggestionForKey(
+  public boolean findSuggestionForKey(
       @NotNull CompletionParameters completionParameters, @NotNull CompletionResultSet resultSet,
-      @Nullable String parentName, String queryString
+      @Nullable String parentName, String queryString, InsertHandler<LookupElement> insertHandler
   ) {
     Module module = findModule(completionParameters);
     Collection<MetadataItem> candidates = findProperty(module, parentName, queryString);
+    List<? extends LookupElement> suggestions = null;
     if (!candidates.isEmpty()) {
-      candidates.stream().map(metaItem -> {
+      suggestions = candidates.stream().map(metaItem -> {
         if (Objects.requireNonNull(metaItem) instanceof MetadataProperty property) {
           return createLookupElement(parentName, property);
-        } else if (metaItem instanceof MetadataGroup group) {
+            } else if (metaItem instanceof MetadataGroup group) {
           return createLookupElement(parentName, group);
-        }
-        throw new IllegalStateException("Unexpected value: " + metaItem);
-      }).filter(Objects::nonNull).forEach(resultSet::addElement);
-      return;
+            }
+        throw new IllegalStateException("Unexpected value: " + metaItem);})
+          .filter(Objects::nonNull)
+          .map(le -> LookupElementDecorator.withInsertHandler(le, insertHandler))
+          .toList();
     }
     // Or maybe user is asking suggestion for a Map key
     MetadataProperty property = ModuleMetadataService.getInstance(module).getIndex().getProperty(parentName);
     if (property != null && property.isMapType()) {
-      resultSet.addAllElements(completionForMapKey(
-          property, completionParameters, resultSet.getPrefixMatcher(), queryString));
+      suggestions = completionForMapKey(
+          property, completionParameters, resultSet.getPrefixMatcher(), queryString, insertHandler);
+    }
+    if (suggestions != null && !suggestions.isEmpty()) {
+      resultSet.addAllElements(suggestions);
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -100,11 +111,13 @@ public final class CompletionService {
    *
    * @param propertyName The context property name for querying value, must be existed.
    * @param queryString  The user input for completion.
+   * @return true if some suggestions have been added to the resultSet.
    */
-  public void findSuggestionForValue(
+  public boolean findSuggestionForValue(
       @NotNull CompletionParameters completionParameters,
       @NotNull final CompletionResultSet completionResultSet,
-      @NotNull String propertyName, String queryString
+      @NotNull String propertyName, String queryString,
+      InsertHandler<LookupElement> insertHandler
   ) {
     //If user is asking suggestion for an array value
     PropertyName propName = PropertyName.adapt(propertyName);
@@ -116,10 +129,11 @@ public final class CompletionService {
     CompletionResultSet resultSet = completionResultSet.caseInsensitive();
     Module module = findModule(completionParameters);
     PrefixMatcher prefixMatcher = resultSet.getPrefixMatcher();
-    List<LookupElement> hints = completionForValue(completionParameters, propertyName, prefixMatcher, queryString);
+    List<LookupElement> hints = completionForValue(completionParameters, propertyName, prefixMatcher, queryString,
+        insertHandler);
     if (!hints.isEmpty()) {
       resultSet.addAllElements(hints);
-      return;
+      return true;
     }
     // Maybe we are looking for a Map's value suggestion
     String parentKey = propName.getParent().toString();
@@ -127,22 +141,25 @@ public final class CompletionService {
       MetadataIndex index = ModuleMetadataService.getInstance(module).getIndex();
       MetadataProperty parent = index.getProperty(parentKey);
       if (parent != null && parent.isMapType()) {
-        hints = completionForValue(completionParameters, parentKey, prefixMatcher, queryString);
+        hints = completionForValue(completionParameters, parentKey, prefixMatcher, queryString, insertHandler);
         if (!hints.isEmpty()) {
           resultSet.addAllElements(hints);
-          return;
+          return true;
         }
       }
       // If we have a property whose type is Map<String,?>, it can map to any depth of key,
       // so let's find to the ancestors till find it, and use its value's hint.
       parent = index.getNearestParentProperty(parentKey);
       if (parent != null && parent.getFullType().filter(t -> PsiTypeUtils.isValueMap(project, t)).isPresent()) {
-        hints = completionForValue(completionParameters, parent.getNameStr(), prefixMatcher, queryString);
+        hints = completionForValue(completionParameters, parent.getNameStr(), prefixMatcher, queryString,
+            insertHandler);
         if (!hints.isEmpty()) {
           resultSet.addAllElements(hints);
+          return true;
         }
       }
     }
+    return false;
   }
 
 
@@ -191,30 +208,32 @@ public final class CompletionService {
 
   private List<LookupElement> completionForMapKey(
       MetadataProperty property, @NotNull CompletionParameters completionParameters,
-      @Nullable PrefixMatcher prefixMatcher, String queryString
+      @Nullable PrefixMatcher prefixMatcher, String queryString, InsertHandler<LookupElement> insertHandler
   ) {
     return property.getKeyHint()
-        .map(h -> getHintValues(h, completionParameters, prefixMatcher, queryString))
+        .map(h -> getHintValues(h, completionParameters, prefixMatcher, queryString, insertHandler))
         .orElseGet(Collections::emptyList);
   }
 
 
   private @NotNull List<LookupElement> completionForValue(
       @NotNull CompletionParameters completionParameters, @NotNull String propertyName,
-      @Nullable PrefixMatcher prefixMatcher, String queryString
+      @Nullable PrefixMatcher prefixMatcher, String queryString, InsertHandler<LookupElement> insertHandler
   ) {
     Module module = findModule(completionParameters);
     MetadataProperty property = ModuleMetadataService.getInstance(module).getIndex().getProperty(propertyName);
     if (property == null) return List.of();
     Optional<MetadataHint> hint = property.getHint();
     if (hint.isPresent()) {
-      return getHintValues(hint.get(), completionParameters, prefixMatcher, queryString);
+      return getHintValues(hint.get(), completionParameters, prefixMatcher, queryString, insertHandler);
     } else {
       // If no hint available, try to provide completion for some specific property type like there is handle-as hint
       PrefixMatcher matcher = getPrefixMatcher(prefixMatcher, queryString);
       return HandleAsValueProvider.getHandler(property.getMetadata().getType())
           .handle(completionParameters, matcher)
-          .stream().map(this::createLookupElement).toList();
+          .stream().map(this::createLookupElement)
+          .map(le -> (LookupElement) LookupElementDecorator.withInsertHandler(le, insertHandler))
+          .toList();
     }
   }
 
@@ -224,13 +243,16 @@ public final class CompletionService {
    */
   private List<LookupElement> getHintValues(
       MetadataHint hint, CompletionParameters completionParameters,
-      @Nullable PrefixMatcher prefixMatcher, String queryString
+      @Nullable PrefixMatcher prefixMatcher, String queryString, InsertHandler<LookupElement> insertHandler
   ) {
+    PrefixMatcher matcher = getPrefixMatcher(prefixMatcher, queryString);
     return Stream.concat(
             hint.getValues().stream().map(ValueHint::toHint),
             hint.getProviders().parallelStream().flatMap(vp ->
-                vp.provideValues(completionParameters, getPrefixMatcher(prefixMatcher, queryString)).stream())
+                vp.provideValues(completionParameters, matcher).stream())
         ).map(this::createLookupElement)
+        .filter(matcher::prefixMatches)
+        .map(le -> (LookupElement) LookupElementDecorator.withInsertHandler(le, insertHandler))
         .toList();
   }
 
@@ -238,22 +260,22 @@ public final class CompletionService {
   private LookupElement createLookupElement(Hint hint) {
     LookupElement result;
     if (hint.psiElement() instanceof PsiVariable psiVariable) {
-      result = new VariableLookupItem(psiVariable).setInsertHandler(YamlValueInsertHandler.INSTANCE);
+      result = new VariableLookupItem(psiVariable);
     } else if (hint.psiElement() instanceof PsiClass psiClass) {
       JavaPsiClassReferenceElement li = new JavaPsiClassReferenceElement(psiClass);
-      li.setInsertHandler(YamlValueInsertHandler.INSTANCE);
+
       if (StringUtils.isNotBlank(hint.value())) {
         li.setLookupString(hint.value());
         li.setForcedPresentableName(li.getLookupString());
       }
       result = li;
     } else if (hint.psiElement() instanceof PsiMethod psiMethod) {
-      result = new JavaMethodCallElement(psiMethod).setInsertHandler(YamlValueInsertHandler.INSTANCE);
+      result = new JavaMethodCallElement(psiMethod);
     } else {
       LookupElementBuilder le = ReadAction.compute(() ->
           LookupElementBuilder.create(hint.value()).withIcon(hint.icon())
               .withPsiElement(new SourceContainer(hint, project))
-              .withInsertHandler(YamlValueInsertHandler.INSTANCE));
+              );
       if (StringUtils.isNotBlank(hint.oneLineDescription())) {
         le = le.withTailText("(" + hint.oneLineDescription() + ")", true);
       }
@@ -275,7 +297,7 @@ public final class CompletionService {
     }
     LookupElementBuilder leb = LookupElementBuilder.create(removeParent(propertyNameAncestors, property.getNameStr()))
         .withIcon(property.getIcon().getSecond()).withPsiElement(new SourceContainer(property, project))
-        .withStrikeoutness(deprecation != null).withInsertHandler(YamlKeyInsertHandler.INSTANCE);
+        .withStrikeoutness(deprecation != null);
     if (StringUtils.isNotBlank(property.getMetadata().getDescription())) {
       leb = leb.withTailText("(" + property.getMetadata().getDescription() + ")", true);
     }
@@ -288,8 +310,7 @@ public final class CompletionService {
 
   private LookupElement createLookupElement(String propertyNameAncestors, MetadataGroup group) {
     return LookupElementBuilder.create(removeParent(propertyNameAncestors, group.getNameStr()))
-        .withIcon(group.getIcon().getSecond()).withPsiElement(new SourceContainer(group, project))
-        .withInsertHandler(YamlKeyInsertHandler.INSTANCE);
+        .withIcon(group.getIcon().getSecond()).withPsiElement(new SourceContainer(group, project));
   }
 
 
@@ -302,6 +323,10 @@ public final class CompletionService {
 
 
   private static @NotNull PrefixMatcher getPrefixMatcher(@Nullable PrefixMatcher prefixMatcher, String queryString) {
-    return Objects.requireNonNullElseGet(prefixMatcher, () -> new CamelHumpMatcher(queryString, false));
+    if (prefixMatcher == null || StringUtils.isBlank(prefixMatcher.getPrefix())) {
+      return new CamelHumpMatcher(queryString, false);
+    } else {
+      return prefixMatcher;
+    }
   }
 }

@@ -18,6 +18,16 @@ to [Semantic Versioning](https://semver.org).
 
 ### Security
 
+## 601.0.0+223 - 2025-03-02
+
+### Added
+
+- Support `application.properties` files.
+
+### Changed
+
+- `Spring Configuration YAML File` have got a new icon.
+
 ## 600.0.0+223 - 2025-02-03
 
 ### Added
