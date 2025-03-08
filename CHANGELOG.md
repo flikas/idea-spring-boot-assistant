@@ -18,6 +18,15 @@ to [Semantic Versioning](https://semver.org).
 
 ### Security
 
+## 601.0.1+223 - 2025-03-08
+
+### Fixed
+
+- Issue [#1018](https://github.com/flikas/archived-idea-spring-boot-assistant/issues/1018): Error while searching
+  reference.
+  > Java.lang.Throwable: No dependencies provided which causes CachedValue to be never recalculated again. If this is
+  intentional, please use ModificationTracker.NEVER_CHANGED
+
 ## 601.0.0+223 - 2025-03-02
 
 ### Added

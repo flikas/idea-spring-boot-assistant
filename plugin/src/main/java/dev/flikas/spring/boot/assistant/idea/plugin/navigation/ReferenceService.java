@@ -27,6 +27,7 @@ import dev.flikas.spring.boot.assistant.idea.plugin.filetype.SpringBootConfigura
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataGroup;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.index.MetadataProperty;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.service.ModuleMetadataService;
+import org.apache.commons.collections4.MultiMapUtils;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.collection.CompositeCollection;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
@@ -139,6 +140,8 @@ public final class ReferenceService {
      */
     public MultiValuedMap<String, PsiReference> getIndex(Collection<VirtualFile> files) {
       dropCacheIfCollectionChanged(files);
+      // If the files collection is empty, CachedValueProvider.Result.create will throw an error.
+      if (files.isEmpty()) return MultiMapUtils.emptyMultiValuedMap();
       return CachedValuesManager.getManager(project).getCachedValue(this, () -> {
         // In this block, we return null at any error, makes this function is **Result equivalence**.
         MultiValuedMap<String, PsiReference> index = new HashSetValuedHashMap<>();
