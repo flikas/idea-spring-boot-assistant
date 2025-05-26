@@ -102,6 +102,8 @@ final class ProjectClassMetadataService implements Disposable {
     } else {
       PsiClass valueClass = PsiTypeUtils.resolveClassInType(type);
       if (valueClass == null) return index;
+      if (index.isVisitedClass(valueClass)) return index;
+      index.addVisitedClass(valueClass);
       ConfigurationMetadata metadata = new ConfigurationMetadata();
       String[] writableProperties = PropertyUtil.getWritableProperties(valueClass, true);
       for (String fieldName : writableProperties) {
