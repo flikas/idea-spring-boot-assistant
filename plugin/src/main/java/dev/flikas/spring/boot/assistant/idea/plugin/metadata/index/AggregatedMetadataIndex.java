@@ -1,7 +1,6 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.metadata.index;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiClass;
 import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyName;
 import dev.flikas.spring.boot.assistant.idea.plugin.misc.MutableReference;
 import org.jetbrains.annotations.NotNull;
@@ -12,15 +11,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AggregatedMetadataIndex implements MetadataIndex {
   private final Deque<MutableReference<? extends MetadataIndex>> indexes = new ConcurrentLinkedDeque<>();
-  private final Set<PsiClass> visitedClasses = new CopyOnWriteArraySet<>();
 
 
   public AggregatedMetadataIndex() {
@@ -64,14 +60,6 @@ public class AggregatedMetadataIndex implements MetadataIndex {
       ref.refresh();
       if (ref.dereference() == null) iterator.remove();
     }
-  }
-
-  public void addVisitedClass(PsiClass valueClass) {
-    visitedClasses.add(valueClass);
-  }
-
-  public boolean isVisitedClass(PsiClass valueClass) {
-    return visitedClasses.contains(valueClass);
   }
 
   @Override

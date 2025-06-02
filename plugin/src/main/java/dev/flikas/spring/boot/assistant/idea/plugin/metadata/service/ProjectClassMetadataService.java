@@ -23,7 +23,9 @@ import dev.flikas.spring.boot.assistant.idea.plugin.metadata.source.PropertyName
 import dev.flikas.spring.boot.assistant.idea.plugin.misc.PsiTypeUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.LinkedHashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static dev.flikas.spring.boot.assistant.idea.plugin.misc.PsiTypeUtils.getCanonicalTextOfType;
 import static java.util.function.Predicate.not;
@@ -63,12 +65,13 @@ final class ProjectClassMetadataService implements Disposable {
   private MetadataIndex generateMetadataInSmartMode(
       AggregatedMetadataIndex index, PropertyName basename, PsiType type
   ) {
-    return DumbService.getInstance(project).runReadActionInSmartMode(() -> generateMetadata(index, basename, type));
+    Set<PsiClass> visitedClasses = new LinkedHashSet<>();
+    return DumbService.getInstance(project).runReadActionInSmartMode(() -> generateMetadata(index, basename, type, visitedClasses));
   }
 
 
   @NotNull
-  private MetadataIndex generateMetadata(AggregatedMetadataIndex index, PropertyName basename, PsiType type) {
+  private MetadataIndex generateMetadata(AggregatedMetadataIndex index, PropertyName basename, PsiType type, Set<PsiClass> visitedClasses) {
     LOG.debug("Generating metadata for: " + basename + " -> " + type.getPresentableText());
     if (PsiTypeUtils.isValueType(type)) {
       // Exit condition: value type do not need to index.
@@ -85,7 +88,7 @@ final class ProjectClassMetadataService implements Disposable {
           LOG.warn(basename + " has unsupported Map key type: " + type);
           return index;
         }
-        generateMetadata(index, basename.appendAnyMapKey(), kvType[1]);
+        generateMetadata(index, basename.appendAnyMapKey(), kvType[1], visitedClasses);
       } catch (Exception e) {
         LOG.warn(basename + " has illegal Map type: " + type);
         return index;
@@ -94,7 +97,7 @@ final class ProjectClassMetadataService implements Disposable {
       try {
         PsiType elementType = PsiTypeUtils.getElementType(project, type);
         assert elementType != null;
-        generateMetadata(index, basename.appendAnyNumericalIndex(), elementType);
+        generateMetadata(index, basename.appendAnyNumericalIndex(), elementType, visitedClasses);
       } catch (Exception e) {
         LOG.warn(basename + " has illegal Collection type: " + type);
         return index;
@@ -102,8 +105,8 @@ final class ProjectClassMetadataService implements Disposable {
     } else {
       PsiClass valueClass = PsiTypeUtils.resolveClassInType(type);
       if (valueClass == null) return index;
-      if (index.isVisitedClass(valueClass)) return index;
-      index.addVisitedClass(valueClass);
+      if (visitedClasses.contains(valueClass)) return index;
+      visitedClasses.add(valueClass);
       ConfigurationMetadata metadata = new ConfigurationMetadata();
       String[] writableProperties = PropertyUtil.getWritableProperties(valueClass, true);
       for (String fieldName : writableProperties) {
@@ -128,7 +131,7 @@ final class ProjectClassMetadataService implements Disposable {
           metadata.getProperties().add(meta);
         } else {
           // Nested class, recursive in.
-          generateMetadata(index, name, propertyType);
+          generateMetadata(index, name, propertyType, visitedClasses);
         }
       }
       index.addLast(new ConfigurationMetadataIndex(metadata, valueClass, project));
