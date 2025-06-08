@@ -18,6 +18,13 @@ to [Semantic Versioning](https://semver.org).
 
 ### Security
 
+## 601.0.2+223 - 2025-06-08
+
+### Fixed
+
+- [#16](https://github.com/flikas/idea-spring-boot-assistant/pull/16):
+  The StackOverflowError caused by the self-referencing property class. By [@ferry135](https://github.com/ferry135).
+
 ## 601.0.1+223 - 2025-03-08
 
 ### Fixed

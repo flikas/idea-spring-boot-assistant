@@ -62,7 +62,6 @@ public class AggregatedMetadataIndex implements MetadataIndex {
     }
   }
 
-
   @Override
   public boolean isEmpty() {
     return getIndexStream().allMatch(MetadataIndex::isEmpty);
