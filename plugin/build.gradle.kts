@@ -23,8 +23,8 @@ version = properties("plugin.version") + "+" + properties("plugin.since-build")
 plugins {
     idea
     java
-    id("org.jetbrains.intellij.platform") version "2.2.1"
-    id("org.jetbrains.changelog") version "2.2.1"   // https://github.com/JetBrains/gradle-changelog-plugin
+    id("org.jetbrains.intellij.platform") version "2.10.5"
+    id("org.jetbrains.changelog") version "2.5.0"   // https://github.com/JetBrains/gradle-changelog-plugin
     id("io.freefair.lombok") version "8.10"
 }
 
@@ -138,7 +138,7 @@ intellijPlatform {
     pluginVerification {
         ides {
             select {
-                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
+                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity, IntelliJPlatformType.IntellijIdea)
                 channels = listOf(ProductRelease.Channel.RELEASE)
                 sinceBuild = properties("plugin.since-build")
                 untilBuild = propertyProvider("plugin.until-build")
@@ -180,7 +180,7 @@ tasks {
 
     printProductsReleases {
         channels = listOf(ProductRelease.Channel.RELEASE, ProductRelease.Channel.EAP)
-        types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
+        types = listOf(IntelliJPlatformType.IntellijIdeaCommunity, IntelliJPlatformType.IntellijIdea)
         sinceBuild = properties("plugin.since-build")
         untilBuild = propertyProvider("plugin.until-build")
     }

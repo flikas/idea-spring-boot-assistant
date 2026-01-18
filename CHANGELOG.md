@@ -18,6 +18,12 @@ to [Semantic Versioning](https://semver.org).
 
 ### Security
 
+## 601.0.3+242 - 2026-01-19
+
+### Fixed
+
+- Compatibility with the newest IntelliJ IDEA.
+
 ## 601.0.2+242 - 2025-06-08
 
 ### Fixed

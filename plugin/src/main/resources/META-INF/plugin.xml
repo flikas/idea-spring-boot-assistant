@@ -62,7 +62,6 @@
   <depends config-file="META-INF/maven.xml" optional="true">org.jetbrains.idea.maven</depends>
   <depends config-file="META-INF/gradle.xml" optional="true">com.intellij.gradle</depends>
    -->
-  <incompatible-with>com.intellij.spring</incompatible-with>
   <incompatible-with>com.intellij.spring.boot</incompatible-with>
 
   <!-- Minimum and maximum build of IDE compatible with the plugin -->
