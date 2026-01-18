@@ -18,14 +18,38 @@ jobs:
       packages: write
 
     steps:
+      - name: Free Disk Space (Ubuntu)
+        # You may pin to the exact commit or the version.
+        # uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          # Remove Android runtime
+          android: # optional, default is true
+          # Remove .NET runtime
+          dotnet: # optional, default is true
+          # Remove Haskell runtime
+          haskell: # optional, default is true
+          # Remove large packages
+          large-packages: # optional, default is true
+          # Remove Docker images
+          docker-images: # optional, default is true
+          # Remove image tool cache
+          tool-cache: # optional, default is false
+          # Remove swap storage
+          swap-storage: # optional, default is true
+      
       - uses: actions/checkout@v2
+      
       - name: Set up JDK 21 # This jdk is just for running Gradle, the compiler will be downloaded according to Gradle's build script.
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: gradle
-          
+      
+      - name: Clean up
+        run: ./gradlew clean
+        
       - name: Build with Gradle
         run: ./gradlew buildPlugin
 
@@ -33,6 +57,7 @@ jobs:
         run: ./gradlew verifyPlugin
       # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
       # the publishing section of your build.gradle
+
       - name: Publish to JetBrains Marketplace
         run: ./gradlew publishPlugin
         env:
