@@ -12,46 +12,14 @@ on:
 jobs:
   build:
     environment: JetBrains Marketplace
+    env:
+      XDG_CACHE_HOME: '/mnt'
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
 
     steps:
-      - name: Maximize build disk space
-        # You may pin to the exact commit or the version.
-        # uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c
-        uses: easimon/maximize-build-space@v10
-        with:
-          # Space to be left free on the root filesystem, in Megabytes.
-          root-reserve-mb: 1024 # optional, default is 1024
-          # Space to be left free on the temp filesystem (/mnt), in Megabytes.
-          temp-reserve-mb: 100 # optional, default is 100
-          # Swap space to create, in Megabytes.
-          swap-size-mb: 4096 # optional, default is 4096
-          # Create the LVM disk images as sparse files, making the space required for the LVM image files *appear* unused on the
-          # hosting volumes until actually allocated. Use with care, this can lead to surprising out-of-disk-space situations.
-          # You should prefer adjusting root-reserve-mb/temp-reserve-mb over using this option.
-          overprovision-lvm: # optional, default is false
-          # Absolute path to the mount point where the build space will be available, defaults to $GITHUB_WORKSPACE if unset.
-          build-mount-path: # optional
-          # Ownership of the mount point path, defaults to standard "runner" user and group.
-          build-mount-path-ownership: # optional, default is runner:runner
-          # Absolute file path for the LVM image created on the root filesystem, the default is usually fine.
-          pv-loop-path: # optional, default is /pv.img
-          # Absolute file path for the LVM image created on the temp filesystem, the default is usually fine. Must reside on /mnt
-          tmp-pv-loop-path: # optional, default is /mnt/tmp-pv.img
-          # Removes .NET runtime and libraries. (frees ~17 GB)
-          remove-dotnet: true # optional, default is false
-          # Removes Android SDKs and Tools. (frees ~11 GB)
-          remove-android: true # optional, default is false
-          # Removes GHC (Haskell) artifacts. (frees ~2.7 GB)
-          remove-haskell: true # optional, default is false
-          # Removes CodeQL Action Bundles. (frees ~5.4 GB)
-          remove-codeql: true # optional, default is false
-          # Removes cached Docker images. (frees ~3 GB)
-          remove-docker-images: true # optional, default is false
-
       - uses: actions/checkout@v2
 
       - name: Set up JDK 21 # This jdk is just for running Gradle, the compiler will be downloaded according to Gradle's build script.
@@ -69,6 +37,9 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew buildPlugin
+
+      - name: df
+        run: df -h
 
       - name: Run Plugin Verifier
         run: ./gradlew verifyPlugin
