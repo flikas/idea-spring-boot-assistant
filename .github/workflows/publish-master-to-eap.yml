@@ -18,25 +18,39 @@ jobs:
       packages: write
 
     steps:
-      - name: Free Disk Space (Ubuntu)
+      - name: Maximize build disk space
         # You may pin to the exact commit or the version.
-        # uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be
-        uses: jlumbroso/free-disk-space@v1.3.1
+        # uses: easimon/maximize-build-space@fc881a613ad2a34aca9c9624518214ebc21dfc0c
+        uses: easimon/maximize-build-space@v10
         with:
-          # Remove Android runtime
-          android: # optional, default is true
-          # Remove .NET runtime
-          dotnet: # optional, default is true
-          # Remove Haskell runtime
-          haskell: # optional, default is true
-          # Remove large packages
-          large-packages: # optional, default is true
-          # Remove Docker images
-          docker-images: # optional, default is true
-          # Remove image tool cache
-          tool-cache: # optional, default is false
-          # Remove swap storage
-          swap-storage: # optional, default is true
+          # Space to be left free on the root filesystem, in Megabytes.
+          root-reserve-mb: # optional, default is 1024
+          # Space to be left free on the temp filesystem (/mnt), in Megabytes.
+          temp-reserve-mb: # optional, default is 100
+          # Swap space to create, in Megabytes.
+          swap-size-mb: # optional, default is 4096
+          # Create the LVM disk images as sparse files, making the space required for the LVM image files *appear* unused on the
+          # hosting volumes until actually allocated. Use with care, this can lead to surprising out-of-disk-space situations.
+          # You should prefer adjusting root-reserve-mb/temp-reserve-mb over using this option.
+          overprovision-lvm: # optional, default is false
+          # Absolute path to the mount point where the build space will be available, defaults to $GITHUB_WORKSPACE if unset.
+          build-mount-path: # optional
+          # Ownership of the mount point path, defaults to standard "runner" user and group.
+          build-mount-path-ownership: # optional, default is runner:runner
+          # Absolute file path for the LVM image created on the root filesystem, the default is usually fine.
+          pv-loop-path: # optional, default is /pv.img
+          # Absolute file path for the LVM image created on the temp filesystem, the default is usually fine. Must reside on /mnt
+          tmp-pv-loop-path: # optional, default is /mnt/tmp-pv.img
+          # Removes .NET runtime and libraries. (frees ~17 GB)
+          remove-dotnet: true # optional, default is false
+          # Removes Android SDKs and Tools. (frees ~11 GB)
+          remove-android: true # optional, default is false
+          # Removes GHC (Haskell) artifacts. (frees ~2.7 GB)
+          remove-haskell: true # optional, default is false
+          # Removes CodeQL Action Bundles. (frees ~5.4 GB)
+          remove-codeql: true # optional, default is false
+          # Removes cached Docker images. (frees ~3 GB)
+          remove-docker-images: true # optional, default is false
 
       - uses: actions/checkout@v2
 
