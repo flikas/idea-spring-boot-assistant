@@ -41,8 +41,9 @@ jobs:
       - name: df
         run: df -h
 
-      - name: Run Plugin Verifier
-        run: ./gradlew verifyPlugin
+      # Temporary Disable Verify due to limit of diskspace
+      #- name: Run Plugin Verifier
+      #  run: ./gradlew verifyPlugin
       # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
       # the publishing section of your build.gradle
 
