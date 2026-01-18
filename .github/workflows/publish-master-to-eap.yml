@@ -24,11 +24,11 @@ jobs:
         uses: easimon/maximize-build-space@v10
         with:
           # Space to be left free on the root filesystem, in Megabytes.
-          root-reserve-mb: # optional, default is 1024
+          root-reserve-mb: 1024 # optional, default is 1024
           # Space to be left free on the temp filesystem (/mnt), in Megabytes.
-          temp-reserve-mb: # optional, default is 100
+          temp-reserve-mb: 100 # optional, default is 100
           # Swap space to create, in Megabytes.
-          swap-size-mb: # optional, default is 4096
+          swap-size-mb: 4096 # optional, default is 4096
           # Create the LVM disk images as sparse files, making the space required for the LVM image files *appear* unused on the
           # hosting volumes until actually allocated. Use with care, this can lead to surprising out-of-disk-space situations.
           # You should prefer adjusting root-reserve-mb/temp-reserve-mb over using this option.
