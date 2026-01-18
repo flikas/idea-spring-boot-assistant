@@ -37,19 +37,22 @@ jobs:
           tool-cache: # optional, default is false
           # Remove swap storage
           swap-storage: # optional, default is true
-      
+
       - uses: actions/checkout@v2
-      
+
       - name: Set up JDK 21 # This jdk is just for running Gradle, the compiler will be downloaded according to Gradle's build script.
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: gradle
-      
+
       - name: Clean up
         run: ./gradlew clean
-        
+
+      - name: Clean up ide cache
+        run: rm -rf ~/.cache/.pluginVerifier ~/.pluginVerifier
+
       - name: Build with Gradle
         run: ./gradlew buildPlugin
 

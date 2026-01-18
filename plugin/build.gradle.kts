@@ -137,12 +137,7 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            select {
-                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity, IntelliJPlatformType.IntellijIdea)
-                channels = listOf(ProductRelease.Channel.RELEASE)
-                sinceBuild = properties("plugin.since-build")
-                untilBuild = propertyProvider("plugin.until-build")
-            }
+            recommended()
         }
     }
 }
