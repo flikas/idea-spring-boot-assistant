@@ -62,7 +62,11 @@
   <depends config-file="META-INF/maven.xml" optional="true">org.jetbrains.idea.maven</depends>
   <depends config-file="META-INF/gradle.xml" optional="true">com.intellij.gradle</depends>
    -->
-  <incompatible-with>com.intellij.spring.boot</incompatible-with>
+
+  <!-- Incompatible with Ultimate subscription (2025.3+ unified edition)
+       When user has active Ultimate subscription, this module is loaded and our plugin is disabled.
+       This avoids conflicts with built-in Spring Boot support in Ultimate Edition. -->
+  <incompatible-with>com.intellij.modules.ultimate</incompatible-with>
 
   <!-- Minimum and maximum build of IDE compatible with the plugin -->
   <!-- Will be auto populated from CHANGELOG.md by plugin
