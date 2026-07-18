@@ -23,7 +23,7 @@ version = properties("plugin.version") + "+" + properties("plugin.since-build")
 plugins {
     idea
     java
-    id("org.jetbrains.intellij.platform") version "2.17.0"
+    id("org.jetbrains.intellij.platform") version "2.18.1"
     id("org.jetbrains.changelog") version "2.5.0"   // https://github.com/JetBrains/gradle-changelog-plugin
     id("io.freefair.lombok") version "8.10"
 }

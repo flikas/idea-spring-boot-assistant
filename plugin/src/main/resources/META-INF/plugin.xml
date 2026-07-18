@@ -66,7 +66,7 @@
   <!-- Incompatible with Ultimate subscription (2025.3+ unified edition)
        When user has active Ultimate subscription, this module is loaded and our plugin is disabled.
        This avoids conflicts with built-in Spring Boot support in Ultimate Edition. -->
-  <incompatible-with>com.intellij.modules.ultimate</incompatible-with>
+<!--  <incompatible-with>com.intellij.modules.idea.ultimate</incompatible-with>-->
 
   <!-- Minimum and maximum build of IDE compatible with the plugin -->
   <!-- Will be auto populated from CHANGELOG.md by plugin
