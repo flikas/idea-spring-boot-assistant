@@ -1,13 +1,12 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.report;
 
 import com.intellij.ide.BrowserUtil;
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManagerCore;
+import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.diagnostic.ErrorReportSubmitter;
 import com.intellij.openapi.diagnostic.IdeaLoggingEvent;
 import com.intellij.openapi.diagnostic.SubmittedReportInfo;
-import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.openapi.util.NlsActions;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.Consumer;
@@ -68,8 +67,7 @@ public class GitHubReporter extends ErrorReportSubmitter {
         .append('(').append(info.getBuild()).append(')')
         .append("`\n");
     // Plugin version
-    PluginId pid = PluginId.getId("dev.flikas.idea.spring.boot.assistant.plugin");
-    final IdeaPluginDescriptor plugin = PluginManagerCore.getPlugin(pid);
+    final @Nullable PluginDescriptor plugin = PluginManager.getPluginByClass(GitHubReporter.class);
     assert plugin != null;
     body.append("- Plugin: `")
         .append(plugin.getName()).append(' ').append(plugin.getVersion()).append("`\n")

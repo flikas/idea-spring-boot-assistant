@@ -25,7 +25,7 @@ plugins {
     java
     id("org.jetbrains.intellij.platform") version "2.18.1"
     id("org.jetbrains.changelog") version "2.5.0"   // https://github.com/JetBrains/gradle-changelog-plugin
-    id("io.freefair.lombok") version "8.10"
+    id("io.freefair.lombok") version "9.5.0"
 }
 
 java {
@@ -63,11 +63,11 @@ dependencies {
     }
 
     implementation("jakarta.validation:jakarta.validation-api:3.1.0")
-    implementation("org.apache.commons", "commons-collections4", "4.4")
-    implementation("org.apache.commons", "commons-lang3", "3.14.0")
-    implementation("org.springframework.boot", "spring-boot", "3.3.4")
+    implementation("org.apache.commons:commons-collections4:4.4")
+    implementation("org.apache.commons:commons-lang3:3.18.0")
+    implementation("org.springframework.boot:spring-boot:3.3.4")
 
-    testImplementation("org.mockito", "mockito-core", "2.12.0")
+    testImplementation("org.mockito:mockito-core:2.12.0")
     testImplementation(platform("org.junit:junit-bom:5.11.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

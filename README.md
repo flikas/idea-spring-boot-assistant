@@ -7,6 +7,8 @@ Spring Boot Assistant - IntelliJ-based plugin that assists you in developing spr
 
 <!-- Plugin description -->
 
+NOTE: This plugin is intended for IntelliJ IDEA Community Edition ONLY. It is not compatible with IntelliJ IDEA Ultimate Edition, and using it in Ultimate may cause feature conflicts.
+
 This plugin adds support for
 [Spring Boot external-config files](https://docs.spring.io/spring-boot/reference/features/external-config.html#features.external-config.files)
 (application.yaml/properties, etc.).
@@ -43,6 +45,8 @@ Please create an issue at [GitHub](https://github.com/flikas/idea-spring-boot-as
 <!-- Plugin description end -->
 
 ## Installation
+
+This plugin is intended for IntelliJ IDEA Community Edition. Please do not install it in IntelliJ IDEA Ultimate Edition, as it may conflict with built-in functionality.
 
 Both of the following two ways are fine.
 
