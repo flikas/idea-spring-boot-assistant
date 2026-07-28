@@ -1,12 +1,10 @@
 package dev.flikas.spring.boot.assistant.idea.plugin.report;
 
 import com.intellij.ide.BrowserUtil;
-import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.application.ApplicationInfo;
 import com.intellij.openapi.diagnostic.ErrorReportSubmitter;
 import com.intellij.openapi.diagnostic.IdeaLoggingEvent;
 import com.intellij.openapi.diagnostic.SubmittedReportInfo;
-import com.intellij.openapi.extensions.PluginDescriptor;
 import com.intellij.openapi.util.NlsActions;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.Consumer;
@@ -22,7 +20,7 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class GitHubReporter extends ErrorReportSubmitter {
+final class GitHubReporter extends ErrorReportSubmitter {
   @Override
   public @NlsActions.ActionText @NotNull String getReportActionText() {
     return "Create Bug Report at GitHub";
@@ -66,12 +64,21 @@ public class GitHubReporter extends ErrorReportSubmitter {
         .append(info.getVersionName()).append(' ').append(info.getFullVersion())
         .append('(').append(info.getBuild()).append(')')
         .append("`\n");
-    // Plugin version
-    final @Nullable PluginDescriptor plugin = PluginManager.getPluginByClass(GitHubReporter.class);
-    assert plugin != null;
-    body.append("- Plugin: `")
-        .append(plugin.getName()).append(' ').append(plugin.getVersion()).append("`\n")
-        .append("\n");
+    // Plugin version - prefer Manifest (Implementation-Title/Implementation-Version) injected at build time.
+    // Keep logic minimal: use Package implementation attributes when available, otherwise fall back to sensible defaults.
+    String pluginName = null;
+    String pluginVersion = null;
+    Package pkg = GitHubReporter.class.getPackage();
+    if (pkg != null) {
+      String implTitle = pkg.getImplementationTitle();
+      String implVersion = pkg.getImplementationVersion();
+      if (StringUtils.isNotBlank(implTitle)) pluginName = implTitle;
+      if (StringUtils.isNotBlank(implVersion)) pluginVersion = implVersion;
+    }
+
+    if (pluginName == null) pluginName = "Spring Boot Assistant";
+    if (pluginVersion == null) pluginVersion = "(unknown version)";
+    body.append("- Plugin: `").append(pluginName).append(' ').append(pluginVersion).append("`\n\n");
 
     for (IdeaLoggingEvent event : events) {
       body.append("## Exception\n")

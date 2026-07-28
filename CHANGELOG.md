@@ -18,7 +18,7 @@ to [Semantic Versioning](https://semver.org).
 
 ### Security
 
-## 601.0.6+242 - 2026-07-26
+## 601.0.7+242 - 2026-07-26
 
 ### Fixed
 

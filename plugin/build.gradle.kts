@@ -5,6 +5,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 
+
 /**
  * Shortcut for <code>project.findProperty(key).toString()</code>.
  */
@@ -146,6 +147,20 @@ tasks {
     compileJava {
         options.release = properties("platform.java-version").toInt()
     }
+
+    // Add Implementation-Title and Implementation-Version to all jar manifests so runtime
+    // code can read plugin version via Package.getImplementationVersion(). This is useful
+    // when avoiding platform internal APIs.
+    withType<Jar> {
+        manifest {
+            attributes(
+                "Implementation-Title" to properties("plugin.name"),
+                "Implementation-Version" to project.version.toString()
+            )
+        }
+    }
+
+    // Note: manifest verification and runtime verifier removed per request.
 
     buildPlugin {
         archiveFileName = properties("plugin.name").lowercase().replace(' ', '-') + "-$version.zip"
